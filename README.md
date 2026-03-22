@@ -1,37 +1,61 @@
+
 # Генеалогический архив
 
-## Запуск проекта
+### Запуск проекта
 
-### Требования (скачиваете)
-- **Docker Desktop** — [скачать](https://www.docker.com/products/docker-desktop/)
+- **Docker Desktop** — [скачать](https://www.docker.com/products/docker-desktop/) 
 - **Git** — [скачать](https://git-scm.com/downloads)
 
 ### Первый запуск
-- git clone https://github.com/ВАШ_ЛОГИН/genealogy-archive.git (просто ссылка репозитория)
-- cd genealogy-archive (переходите в папку проекта)
-- docker-compose up --build (при первом запуске происходит сборка)
-- docker-compose exec backend python manage.py migrate (в новом терминале)
-- docker-compose exec backend python manage.py createsuperuser (для админки, для удобства)
 
-### Ежедневный запуск:
-- git pull origin main (получение измениний с репозитория)
-- docker-compose up (обычный запуск проекта без пересборки)
-- docker-compose exec backend python manage.py migrate   # если были изменения в моделях в бд
+```bash
+git clone https://github.com/ВАШ_ЛОГИН/genealogy-archive.git #ссылка на репозиторий
+cd genealogy-archive
+docker-compose up --build #запуск со сборкой
+```
 
-### Структура:
+**В новом терминале (терминал с запущенным проектом не закрывать):**
+```bash
+docker-compose exec backend python manage.py migrate #приминение миграций (таблицы бд)
+docker-compose exec backend python manage.py createsuperuser #создание админа для удобства (не обязательно)
+```
 
-- genealogy-archive/
-- ├── backend/           # Django
-- ├── frontend/          # Vue
-- └── docker-compose.yml # Запуск всех сервисов
+### Ежедневный запуск
+
+```bash
+git pull origin main #получение изменений с репозитория
+docker-compose up #запуск без пересборки
+docker-compose exec backend python manage.py migrate   # если были изменения в моделях
+```
+
+### Структура
+
+```
+genealogy-archive/
+├── backend/           # Django
+├── frontend/          # Vue
+└── docker-compose.yml # Запуск всех сервисов
+```
 
 ### Git — краткий гайд
-- git pull origin main (получить измениния с репозитория)
-- git add . (добавить все измененные файлы для отправки)
-- git commit -m "Что сделали" (коммит)
-- git push origin main (отправка изменений на главную ветку main)
-- git checkout -b feature/название-задачи (создание ветки для новой задачи, feature-префикс, почитаете как создавать ветки)
-- git push origin feature/название-задачи (отправить ветку на гитхаб, будет подтверждение)
-- git status          (какие файлы изменены)
-- git log --oneline   (история коммитов)
-- git branch          (список веток)
+
+| Команда | Что делает |
+|---------|------------|
+| `git pull origin main` | Получить изменения с репозитория |
+| `git add .` | Добавить все изменённые файлы |
+| `git commit -m "Что сделали"` | Сохранить изменения локально |
+| `git push origin main` | Отправить изменения на GitHub |
+
+**Ветки:**
+```bash
+git checkout -b feature/название-задачи   # создать ветку
+git push origin feature/название-задачи   # отправить ветку на GitHub
+# затем на GitHub создать Pull Request
+```
+
+**Проверка статуса:**
+```bash
+git status          # какие файлы изменены
+git log --oneline   # история коммитов
+git branch          # список веток
+```
