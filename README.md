@@ -8,10 +8,15 @@
 
 ### Первый запуск
 
+Создаете папку, где будет лежать папка проекта, переходите в командной строке в эту папку (св "путь"), далее:
+
 ```bash
-git clone https://github.com/ВАШ_ЛОГИН/genealogy-archive.git #ссылка на репозиторий
+git init
+git config --global user.name "имя"
+git config --global user.email "почта как на гитхабе"
+git clone https://github.com/erzsebet-l/genealogy-archiv.git #ссылка на репозиторий
 cd genealogy-archive
-docker-compose up --build #запуск со сборкой
+docker-compose up --build #запуск со сборкой (в этот момент десктопный docker должен быть запущен + включен vpn для скачивания зависимостей)
 ```
 
 **В новом терминале (терминал с запущенным проектом не закрывать):**
