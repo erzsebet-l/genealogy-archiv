@@ -28,13 +28,52 @@
 <script setup>
 import { ref } from 'vue'
 
+const API = 'http://localhost:8000'
+
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const repeatPassword = ref('')
 
-const register = () => {
-  console.log('register:', name.value, email.value)
+const register = async () => {
+  if (password.value !== repeatPassword.value) {
+    alert('Пароли не совпадают')
+    return
+  }
+
+  try {
+    const response = await fetch(`${API}/api/register/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        full_name: name.value,
+        email: email.value,
+        password: password.value
+      })
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      console.log('Пользователь создан:', data)
+      alert('Регистрация успешна')
+
+      // очистка формы
+      name.value = ''
+      email.value = ''
+      password.value = ''
+      repeatPassword.value = ''
+    } else {
+      console.log('Ошибка:', data)
+      alert('Ошибка регистрации')
+    }
+
+  } catch (error) {
+    console.error(error)
+    alert('Ошибка сервера (backend недоступен)')
+  }
 }
 </script>
 

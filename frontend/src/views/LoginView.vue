@@ -27,8 +27,37 @@ import { ref } from 'vue'
 const email = ref('')
 const password = ref('')
 
-const login = () => {
-  console.log('login:', email.value, password.value)
+const login = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/api/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      })
+    })
+
+    if (response.ok) {
+      const data = await response.json()
+      console.log('LOGIN SUCCESS:', data)
+
+      // сюда обычно кладут токен
+      localStorage.setItem('token', data.access)
+
+      alert('Вход выполнен')
+    } else {
+      const error = await response.json()
+      console.log('LOGIN ERROR:', error)
+      alert('Ошибка входа')
+    }
+
+  } catch (err) {
+    console.error(err)
+    alert('Ошибка сервера')
+  }
 }
 </script>
 
