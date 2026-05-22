@@ -18,7 +18,7 @@
       <button @click="register">Зарегистрироваться</button>
 
       <div class="bottom">
-        Уже есть аккаунт?
+      
         <router-link to="/home">Войти как гость</router-link>
       </div>
     </div>
