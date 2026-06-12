@@ -16,8 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.static import static
+from django.conf import settings
+from directories.views import ChangePasswordView
 
 urlpatterns = [
+    path('api/auth/change-password/', ChangePasswordView.as_view(), name='change-password'),  # ← ДОБАВЬТЕ ЭТУ СТРОКУ
     path('admin/', admin.site.urls),
     path('api/', include('users.urls')),
+    path('api/', include('directories.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

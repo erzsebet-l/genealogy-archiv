@@ -11,28 +11,28 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+BIRTH_SCAN_UPLOAD = 'uploads/scans/birth/'
+MARRIAGE_SCAN_UPLOAD = 'uploads/scans/marriage/'
+DEATH_SCAN_UPLOAD = 'uploads/scans/death/'
+DRAFT_SCAN_UPLOAD = 'uploads/drafts/'
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-qhk^&5&d8!2ud9udl!3))zl=qdomt)bgvxe@2gwax8$27(imrq'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'backend',
     "localhost",
     "127.0.0.1",
     "192.168.138.1",
     "172.31.0.1",
 ]
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -80,10 +80,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-import os
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -95,9 +91,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -120,10 +113,14 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
+from datetime import timedelta
 
-LANGUAGE_CODE = 'en-us'
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15), 
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,   # каждый refresh выдаёт новый refresh
+    'BLACKLIST_AFTER_ROTATION': True, # старый становится недействительным
+}
 
 TIME_ZONE = 'UTC'
 
@@ -131,9 +128,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
+LANGUAGE_CODE = 'ru' # или 'ru-ru'
 
 STATIC_URL = 'static/'
 CORS_ALLOWED_ORIGINS = [
@@ -141,4 +136,4 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # только для разработки
+CORS_ALLOW_ALL_ORIGINS = True  
