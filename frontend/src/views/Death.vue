@@ -45,7 +45,7 @@
 
       <form @submit.prevent="handleSubmit" class="form-body">
 
-        <!-- ───────────── БЛОК: АРХИВ ───────────── -->
+        <!-- ══════════════ БЛОК: АРХИВ ══════════════ -->
         <section class="block">
           <h3 class="block-title">Архив</h3>
 
@@ -133,7 +133,7 @@
           </div>
         </section>
 
-        <!-- ───────────── БЛОК: МЕСТО ЖИТЕЛЬСТВА ───────────── -->
+        <!-- ══════════════ БЛОК: МЕСТО ЖИТЕЛЬСТВА ══════════════ -->
         <section class="block">
           <h3 class="block-title">Место жительства умершего</h3>
 
@@ -149,10 +149,11 @@
                 <label>Губерния</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="provinceSearch"
-                    @input="provinceDropOpen = true; formData.province_id = ''"
+                    @input="onProvinceInput"
                     @focus="provinceDropOpen = true"
                     @blur="closeProvinceDrop"
-                    placeholder="Начните вводить..." autocomplete="off" class="combo-input" />
+                    :placeholder="getLocationName('province')"
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="provinceDropOpen && filteredProvinces.length" class="drop-list">
                     <li v-for="p in filteredProvinces" :key="p.province_id"
                       @mousedown.prevent="selectProvince(p)" class="drop-item">
@@ -169,10 +170,11 @@
                 <label>Уезд</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="yezdSearch"
-                    @input="yezdDropOpen = true; formData.yezd_id = ''"
+                    @input="onYezdInput"
                     @focus="yezdDropOpen = true"
                     @blur="closeYezdDrop"
-                    placeholder="Начните вводить..." autocomplete="off" class="combo-input" />
+                    :placeholder="getLocationName('yezd')"
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="yezdDropOpen && filteredYezds.length" class="drop-list">
                     <li v-for="y in filteredYezds" :key="y.yezd_id"
                       @mousedown.prevent="selectYezd(y)" class="drop-item">
@@ -191,10 +193,11 @@
                 <label>Волость</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="volostSearch"
-                    @input="volostDropOpen = true; formData.volost_id = ''"
+                    @input="onVolostInput"
                     @focus="volostDropOpen = true"
                     @blur="closeVolostDrop"
-                    placeholder="Начните вводить..." autocomplete="off" class="combo-input" />
+                    :placeholder="getLocationName('volost')"
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="volostDropOpen && filteredVolosts.length" class="drop-list">
                     <li v-for="v in filteredVolosts" :key="v.volost_id"
                       @mousedown.prevent="selectVolost(v)" class="drop-item">
@@ -211,10 +214,11 @@
                 <label>Село / Населённый пункт</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="villageSearch"
-                    @input="villageDropOpen = true; formData.village_id = ''"
+                    @input="onVillageInput"
                     @focus="villageDropOpen = true"
                     @blur="closeLocationDrop"
-                    placeholder="Начните вводить..." autocomplete="off" class="combo-input" />
+                    :placeholder="getLocationName('village')"
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="villageDropOpen && filteredVillages.length" class="drop-list">
                     <li v-for="v in filteredVillages" :key="v.village_id"
                       @mousedown.prevent="selectVillage(v)" class="drop-item">
@@ -245,7 +249,7 @@
           </div>
         </section>
 
-        <!-- ───────────── БЛОК: ДАТА ───────────── -->
+        <!-- ══════════════ БЛОК: ДАТА ══════════════ -->
         <section class="block">
           <h3 class="block-title">Дата смерти</h3>
           <div class="row three">
@@ -272,7 +276,60 @@
           </div>
         </section>
 
-        <!-- ───────────── БЛОК: ОБ УМЕРШЕМ ───────────── -->
+        <!-- ══════════════ БЛОК: РОДСТВЕННИК ══════════════ -->
+        <section class="block">
+          <div class="block-title-row">
+            <h3 class="block-title">Родственник</h3>
+            <button type="button" class="btn-add-block" @click="addRelative">＋ добавить</button>
+          </div>
+
+          <div class="info-hint">
+            <span class="hint-icon">ℹ️</span>
+            <span>Выберите степень родства в поле ниже — она означает, кем <strong>умерший</strong> приходится этому родственнику</span>
+          </div>
+
+          <div class="row two">
+            <div class="field" :class="{ 'field-error': showFieldError('kinship_id') }">
+              <label>Степень родства <span class="req-star">*</span></label>
+              <div class="field-with-add">
+                <select v-model="formData.kinship_id" @change="onKinshipChange">
+                  <option value="">Выберите</option>
+                  <option v-for="k in kinshipList" :key="k.kinship_id" :value="k.kinship_id">{{ k.name }}</option>
+                </select>
+                <button type="button" class="btn-add-ref" @click="openModal('kinship')" title="Добавить степень родства">＋</button>
+              </div>
+              <div class="kinship-hint">
+                ⚡ Укажите, кем <strong>умерший</strong> приходится родственнику (например: "отец" — умерший является отцом)
+              </div>
+              <div v-if="showFieldError('kinship_id')" class="error-message">Обязательно для заполнения</div>
+            </div>
+          </div>
+
+          <div v-for="(r, i) in relatives" :key="'rel'+i" class="sub-block">
+            <div class="sub-block-header">
+              <span>Родственник #{{ i + 1 }}</span>
+              <button type="button" class="btn-remove" @click="relatives.splice(i, 1)">✕</button>
+            </div>
+            <div class="row two">
+              <div class="field">
+                <label>Имя</label>
+                <input type="text" v-model="r.name" placeholder="Иоанн" @blur="onRelativeBlur" />
+              </div>
+              <div class="field">
+                <label>Отчество</label>
+                <input type="text" v-model="r.patronymic" placeholder="Иванович" />
+              </div>
+            </div>
+            <div class="row two">
+              <div class="field">
+                <label>Фамилия</label>
+                <input type="text" v-model="r.surname" placeholder="Смирнов" @blur="onRelativeBlur" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════ БЛОК: ОБ УМЕРШЕМ ══════════════ -->
         <section ref="deceasedBlock" class="block">
           <h3 class="block-title">Об умершем</h3>
 
@@ -303,13 +360,27 @@
             </div>
           </div>
 
-          <div class="row two">
-            <div class="field">
-              <label>Возраст</label>
-              <div class="age-wrap">
-                <button type="button" class="age-btn age-down" @click="decrementAge">−</button>
-                <input type="number" min="0" max="120" v-model.number="formData.age" class="age-input" placeholder="0" />
-                <button type="button" class="age-btn age-up" @click="incrementAge">+</button>
+          <!-- ── ВОЗРАСТ: 4 поля ── -->
+          <div class="block">
+            <div class="age-header">
+              <label class="age-label">Возраст</label>
+              <div class="age-fields">
+                <div class="age-field">
+                  <input type="number" min="0" max="150" v-model.number="ageYears" placeholder="0" />
+                  <span>лет</span>
+                </div>
+                <div class="age-field">
+                  <input type="number" min="0" max="11" v-model.number="ageMonths" placeholder="0" />
+                  <span>мес</span>
+                </div>
+                <div class="age-field">
+                  <input type="number" min="0" max="4" v-model.number="ageWeeks" placeholder="0" />
+                  <span>нед</span>
+                </div>
+                <div class="age-field">
+                  <input type="number" min="0" max="6" v-model.number="ageDays" placeholder="0" />
+                  <span>дней</span>
+                </div>
               </div>
             </div>
           </div>
@@ -358,59 +429,10 @@
                 <button type="button" class="suggestion-below-button" @click="acceptPatronymicSuggestion">Применить</button>
               </div>
             </div>
-            <div class="field">
-              <label>Степень родства <span class="req-star">*</span></label>
-              <div class="field-with-add">
-                <select v-model="formData.kinship_id" @change="onKinshipChange">
-                  <option value="">Выберите</option>
-                  <option v-for="k in kinshipList" :key="k.kinship_id" :value="k.kinship_id">{{ k.name }}</option>
-                </select>
-                <button type="button" class="btn-add-ref" @click="openModal('kinship')" title="Добавить степень родства">＋</button>
-              </div>
-              <div class="kinship-hint">
-                ⚡ Укажите, кем <strong>умерший</strong> приходится родственнику (например: "отец" — умерший является отцом)
-              </div>
-            </div>
           </div>
         </section>
 
-        <!-- ───────────── БЛОК: РОДСТВЕННИК ───────────── -->
-        <section class="block">
-          <div class="block-title-row">
-            <h3 class="block-title">Родственник</h3>
-            <button type="button" class="btn-add-block" @click="addRelative">＋ добавить</button>
-          </div>
-
-          <div class="info-hint">
-            <span class="hint-icon">ℹ️</span>
-            <span>Выберите степень родства в поле выше — она означает, кем <strong>умерший</strong> приходится этому родственнику</span>
-          </div>
-
-          <div v-for="(r, i) in relatives" :key="'rel'+i" class="sub-block">
-            <div class="sub-block-header">
-              <span>Родственник #{{ i + 1 }}</span>
-              <button type="button" class="btn-remove" @click="relatives.splice(i, 1)">✕</button>
-            </div>
-            <div class="row two">
-              <div class="field">
-                <label>Имя</label>
-                <input type="text" v-model="r.name" placeholder="Иоанн" @blur="onRelativeBlur" />
-              </div>
-              <div class="field">
-                <label>Отчество</label>
-                <input type="text" v-model="r.patronymic" placeholder="Иванович" />
-              </div>
-            </div>
-            <div class="row two">
-              <div class="field">
-                <label>Фамилия</label>
-                <input type="text" v-model="r.surname" placeholder="Смирнов" @blur="onRelativeBlur" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ───────────── БЛОК: СВЯЩЕННОСЛУЖИТЕЛИ ───────────── -->
+        <!-- ══════════════ БЛОК: СВЯЩЕННОСЛУЖИТЕЛИ ══════════════ -->
         <section class="block">
           <div class="block-title-row">
             <h3 class="block-title">Священнослужители</h3>
@@ -477,7 +499,7 @@
           </div>
         </section>
 
-        <!-- ───────────── БЛОК: ДОПОЛНИТЕЛЬНЫЕ СВЕДЕНИЯ ───────────── -->
+        <!-- ══════════════ БЛОК: ДОПОЛНИТЕЛЬНЫЕ СВЕДЕНИЯ ══════════════ -->
         <section class="block">
           <h3 class="block-title">Дополнительные сведения</h3>
 
@@ -497,7 +519,7 @@
           </div>
         </section>
 
-        <!-- ───────────── ПОДВАЛ ФОРМЫ ───────────── -->
+        <!-- ══════════════ ПОДВАЛ ФОРМЫ ══════════════ -->
         <div class="form-footer">
           <button type="submit" class="btn-submit" :disabled="loading"
             :class="formStatus === 'draft' ? 'draft-submit' : (editingRecordId ? 'edit-submit' : 'publish-submit')">
@@ -659,6 +681,12 @@ export default {
         number_record: false,
       },
 
+      // Возраст (4 поля)
+      ageYears: null,
+      ageMonths: null,
+      ageWeeks: null,
+      ageDays: null,
+
       archiveSearch: '',
       archiveDropOpen: false,
       allArchives: [],
@@ -715,10 +743,13 @@ export default {
         name: '',
         patronymic: '',
         surname: '',
-        age: '',
         cause_of_death: '',
         burial_place: '',
-        comment: ''
+        comment: '',
+        age_years: null,
+        age_months: null,
+        age_weeks: null,
+        age_days: null
       },
 
       relatives: [],
@@ -747,38 +778,25 @@ export default {
     archiveExactMatch() {
       return this.allArchives.some(a => a.name.toLowerCase() === this.archiveSearch.toLowerCase().trim())
     },
-    filteredProvinces() {
-      const q = this.provinceSearch.toLowerCase().trim()
-      if (!q) return this.provinces
-      return this.provinces.filter(p => p.name.toLowerCase().includes(q))
-    },
+
     provinceExactMatch() {
       return this.provinces.some(p => p.name.toLowerCase() === this.provinceSearch.toLowerCase().trim())
-    },
-    filteredYezds() {
-      const q = this.yezdSearch.toLowerCase().trim()
-      if (!q) return this.yezds
-      return this.yezds.filter(y => y.name.toLowerCase().includes(q))
     },
     yezdExactMatch() {
       return this.yezds.some(y => y.name.toLowerCase() === this.yezdSearch.toLowerCase().trim())
     },
-    filteredVolosts() {
-      const q = this.volostSearch.toLowerCase().trim()
-      if (!q) return this.volosts
-      return this.volosts.filter(v => v.name.toLowerCase().includes(q))
-    },
     volostExactMatch() {
       return this.volosts.some(v => v.name.toLowerCase() === this.volostSearch.toLowerCase().trim())
-    },
-    filteredVillages() {
-      const q = this.villageSearch.toLowerCase().trim()
-      if (!q) return this.villages
-      return this.villages.filter(v => v.name.toLowerCase().includes(q))
     },
     villageExactMatch() {
       return this.villages.some(v => v.name.toLowerCase() === this.villageSearch.toLowerCase().trim())
     },
+
+    filteredProvinces() { return this.filterItems(this.provinces, this.provinceSearch, 'province_id') },
+    filteredYezds()     { return this.filterItems(this.yezds,     this.yezdSearch,     'yezd_id') },
+    filteredVolosts()   { return this.filterItems(this.volosts,   this.volostSearch,   'volost_id') },
+    filteredVillages()  { return this.filterItems(this.villages,  this.villageSearch,  'village_id') },
+
     scanTransformStyle() {
       return {
         position: 'absolute',
@@ -812,7 +830,7 @@ export default {
       const kinship = this.kinshipList.find(k => k.kinship_id === this.formData.kinship_id)
       if (!kinship) return false
       const name = kinship.name.toLowerCase()
-      return ['сын', 'дочь', 'сынъ', 'дочька', 'дочка'].includes(name)
+      return ['сын', 'дочь', 'сынъ', 'дочька', 'дочка', 'сыночек', 'доченька'].includes(name)
     },
     firstRelativeWithName() {
       return this.relatives.find(r => r.name && r.name.trim().length >= 2)
@@ -870,6 +888,58 @@ export default {
         this.patronymicAuto = false
         this.suggestFromRelative()
       }
+    },
+
+    // Синхронизация возраста из UI в formData
+    ageYears: { 
+      handler(val) { 
+        this.formData.age_years = val
+      } 
+    },
+    ageMonths: { 
+      handler(val) { 
+        this.formData.age_months = val
+      } 
+    },
+    ageWeeks: { 
+      handler(val) { 
+        this.formData.age_weeks = val
+      } 
+    },
+    ageDays: { 
+      handler(val) { 
+        this.formData.age_days = val
+      } 
+    },
+
+    // Синхронизация из formData в UI
+    'formData.age_years': {
+      handler(val) {
+        if (val !== this.ageYears) {
+          this.ageYears = val
+        }
+      }
+    },
+    'formData.age_months': {
+      handler(val) {
+        if (val !== this.ageMonths) {
+          this.ageMonths = val
+        }
+      }
+    },
+    'formData.age_weeks': {
+      handler(val) {
+        if (val !== this.ageWeeks) {
+          this.ageWeeks = val
+        }
+      }
+    },
+    'formData.age_days': {
+      handler(val) {
+        if (val !== this.ageDays) {
+          this.ageDays = val
+        }
+      }
     }
   },
 
@@ -925,6 +995,300 @@ export default {
   },
 
   methods: {
+    // ══════════════════════════════════════════════════════════════
+    // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ (как в Birth)
+    // ══════════════════════════════════════════════════════════════
+    filterItems(list, search, idKey) {
+      const q = (search || '').toLowerCase().trim()
+      if (!q) return list
+      return list.filter(item => item.name.toLowerCase().includes(q))
+    },
+
+    getLocationName(type) {
+      const map = {
+        province: { list: this.provinces, id: this.formData.province_id, key: 'province_id', search: this.provinceSearch },
+        yezd:     { list: this.yezds,     id: this.formData.yezd_id,     key: 'yezd_id',     search: this.yezdSearch },
+        volost:   { list: this.volosts,   id: this.formData.volost_id,   key: 'volost_id',   search: this.volostSearch },
+        village:  { list: this.villages,  id: this.formData.village_id,  key: 'village_id',  search: this.villageSearch }
+      }
+      const m = map[type]
+      if (!m || !m.id) return 'Начните вводить...'
+      const found = m.list.find(i => i[m.key] === m.id)
+      if (found) return found.name
+      if (m.search) return m.search
+      return 'Начните вводить...'
+    },
+
+    // ── Логика территориальных единиц (как в Birth) ───────────────
+    onProvinceInput() {
+      this.formData.province_id = null
+      this.clearLocationError()
+      this.provinceDropOpen = true
+    },
+
+    async closeProvinceDrop() {
+      setTimeout(async () => {
+        if (this.provinceDropOpen) this.provinceDropOpen = false
+        const name = this.provinceSearch.trim()
+        if (name && !this.formData.province_id) {
+          const existing = this.provinces.find(p => p.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.province_id = existing.province_id
+            this.provinceSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/provinces/', {
+                method: 'POST', headers: authHeaders(true),
+                body: JSON.stringify({ name })
+              })
+              this.provinces.push(newItem)
+              this.formData.province_id = newItem.province_id
+              this.provinceSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания губернии:', err) }
+          }
+          this.clearLocationError()
+        }
+      }, 200)
+    },
+
+    async createNewProvince() {
+      const name = this.provinceSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/provinces/', {
+          method: 'POST', headers: authHeaders(true),
+          body: JSON.stringify({ name })
+        })
+        this.provinces.push(newItem)
+        this.formData.province_id = newItem.province_id
+        this.provinceSearch = newItem.name
+        this.provinceDropOpen = false
+        this.clearLocationError()
+      } catch (err) { console.error('Ошибка создания губернии:', err) }
+    },
+
+    onYezdInput() {
+      this.formData.yezd_id = null
+      this.clearLocationError()
+      this.yezdDropOpen = true
+    },
+
+    async closeYezdDrop() {
+      setTimeout(async () => {
+        if (this.yezdDropOpen) this.yezdDropOpen = false
+        const name = this.yezdSearch.trim()
+        if (name && !this.formData.yezd_id) {
+          const existing = this.yezds.find(y => y.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.yezd_id = existing.yezd_id
+            this.yezdSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/yezds/', {
+                method: 'POST', headers: authHeaders(true),
+                body: JSON.stringify({ name })
+              })
+              this.yezds.push(newItem)
+              this.formData.yezd_id = newItem.yezd_id
+              this.yezdSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания уезда:', err) }
+          }
+          this.clearLocationError()
+        }
+      }, 200)
+    },
+
+    async createNewYezd() {
+      const name = this.yezdSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/yezds/', {
+          method: 'POST', headers: authHeaders(true),
+          body: JSON.stringify({ name })
+        })
+        this.yezds.push(newItem)
+        this.formData.yezd_id = newItem.yezd_id
+        this.yezdSearch = newItem.name
+        this.yezdDropOpen = false
+        this.clearLocationError()
+      } catch (err) { console.error('Ошибка создания уезда:', err) }
+    },
+
+    onVolostInput() {
+      this.formData.volost_id = null
+      this.clearLocationError()
+      this.volostDropOpen = true
+    },
+
+    async closeVolostDrop() {
+      setTimeout(async () => {
+        if (this.volostDropOpen) this.volostDropOpen = false
+        const name = this.volostSearch.trim()
+        if (name && !this.formData.volost_id) {
+          const existing = this.volosts.find(v => v.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.volost_id = existing.volost_id
+            this.volostSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/volosts/', {
+                method: 'POST', headers: authHeaders(true),
+                body: JSON.stringify({ name })
+              })
+              this.volosts.push(newItem)
+              this.formData.volost_id = newItem.volost_id
+              this.volostSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания волости:', err) }
+          }
+          this.clearLocationError()
+        }
+      }, 200)
+    },
+
+    async createNewVolost() {
+      const name = this.volostSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/volosts/', {
+          method: 'POST', headers: authHeaders(true),
+          body: JSON.stringify({ name })
+        })
+        this.volosts.push(newItem)
+        this.formData.volost_id = newItem.volost_id
+        this.volostSearch = newItem.name
+        this.volostDropOpen = false
+        this.clearLocationError()
+      } catch (err) { console.error('Ошибка создания волости:', err) }
+    },
+
+    onVillageInput() {
+      this.formData.village_id = null
+      this.clearLocationError()
+      this.villageDropOpen = true
+    },
+
+    async closeLocationDrop() {
+      setTimeout(async () => {
+        if (this.villageDropOpen) this.villageDropOpen = false
+        const name = this.villageSearch.trim()
+        if (name && !this.formData.village_id) {
+          const existing = this.villages.find(v => v.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.village_id = existing.village_id
+            this.villageSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/villages/', {
+                method: 'POST', headers: authHeaders(true),
+                body: JSON.stringify({ name })
+              })
+              this.villages.push(newItem)
+              this.formData.village_id = newItem.village_id
+              this.villageSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания населенного пункта:', err) }
+          }
+          this.clearLocationError()
+        }
+      }, 200)
+    },
+
+    async createNewVillage() {
+      const name = this.villageSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/villages/', {
+          method: 'POST', headers: authHeaders(true),
+          body: JSON.stringify({ name })
+        })
+        this.villages.push(newItem)
+        this.formData.village_id = newItem.village_id
+        this.villageSearch = newItem.name
+        this.villageDropOpen = false
+        this.clearLocationError()
+      } catch (err) { console.error('Ошибка создания населенного пункта:', err) }
+    },
+
+    selectProvince(p) { 
+      this.formData.province_id = p.province_id
+      this.provinceSearch = p.name
+      this.provinceDropOpen = false
+      this.clearLocationError()
+    },
+    selectYezd(y) { 
+      this.formData.yezd_id = y.yezd_id
+      this.yezdSearch = y.name
+      this.yezdDropOpen = false
+      this.clearLocationError()
+    },
+    selectVolost(v) { 
+      this.formData.volost_id = v.volost_id
+      this.volostSearch = v.name
+      this.volostDropOpen = false
+      this.clearLocationError()
+    },
+    selectVillage(v) { 
+      this.formData.village_id = v.village_id
+      this.villageSearch = v.name
+      this.villageDropOpen = false
+      this.clearLocationError()
+    },
+
+    clearLocationError() {
+      if (this.missingFieldsList.includes('location')) {
+        const index = this.missingFieldsList.indexOf('location')
+        this.missingFieldsList.splice(index, 1)
+      }
+      if (this.missingFieldsList.length === 0 && this.error && this.error.includes('местоположения')) {
+        this.error = null
+      }
+    },
+
+    // ── Возраст ─────────────────────────────────────────────────────
+    syncAgeToFormData() {
+      this.formData.age_years = this.ageYears
+      this.formData.age_months = this.ageMonths
+      this.formData.age_weeks = this.ageWeeks
+      this.formData.age_days = this.ageDays
+    },
+
+    parseAgeFromRecord(record) {
+      if (record.age_years !== undefined && record.age_years !== null) {
+        this.ageYears = record.age_years
+        this.formData.age_years = record.age_years
+      } else if (record.age !== undefined && record.age !== null) {
+        this.ageYears = record.age
+        this.formData.age_years = record.age
+      } else {
+        this.ageYears = null
+        this.formData.age_years = null
+      }
+      
+      if (record.age_months !== undefined && record.age_months !== null) {
+        this.ageMonths = record.age_months
+        this.formData.age_months = record.age_months
+      } else {
+        this.ageMonths = null
+        this.formData.age_months = null
+      }
+      
+      if (record.age_weeks !== undefined && record.age_weeks !== null) {
+        this.ageWeeks = record.age_weeks
+        this.formData.age_weeks = record.age_weeks
+      } else {
+        this.ageWeeks = null
+        this.formData.age_weeks = null
+      }
+      
+      if (record.age_days !== undefined && record.age_days !== null) {
+        this.ageDays = record.age_days
+        this.formData.age_days = record.age_days
+      } else {
+        this.ageDays = null
+        this.formData.age_days = null
+      }
+    },
+
+    // ── Остальные методы ──────────────────────────────────────────
     emptyRelative() {
       return { name: '', patronymic: '', surname: '' }
     },
@@ -1041,49 +1405,6 @@ export default {
       this.surnameAuto = true
     },
 
-    selectProvince(p) { this.formData.province_id = p.province_id; this.provinceSearch = p.name; this.provinceDropOpen = false },
-    selectYezd(y) { this.formData.yezd_id = y.yezd_id; this.yezdSearch = y.name; this.yezdDropOpen = false },
-    selectVolost(v) { this.formData.volost_id = v.volost_id; this.volostSearch = v.name; this.volostDropOpen = false },
-    selectVillage(v) { this.formData.village_id = v.village_id; this.villageSearch = v.name; this.villageDropOpen = false },
-
-    closeProvinceDrop() { setTimeout(() => { this.provinceDropOpen = false }, 200) },
-    closeYezdDrop() { setTimeout(() => { this.yezdDropOpen = false }, 200) },
-    closeVolostDrop() { setTimeout(() => { this.volostDropOpen = false }, 200) },
-    closeLocationDrop() { setTimeout(() => { this.villageDropOpen = false }, 200) },
-
-    async createNewProvince() {
-      const name = this.provinceSearch.trim()
-      if (!name) return
-      try {
-        const newItem = await api('/api/provinces/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
-        this.provinces.push(newItem); this.formData.province_id = newItem.province_id; this.provinceSearch = newItem.name; this.provinceDropOpen = false
-      } catch (err) { console.error('Ошибка создания губернии:', err) }
-    },
-    async createNewYezd() {
-      const name = this.yezdSearch.trim()
-      if (!name) return
-      try {
-        const newItem = await api('/api/yezds/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
-        this.yezds.push(newItem); this.formData.yezd_id = newItem.yezd_id; this.yezdSearch = newItem.name; this.yezdDropOpen = false
-      } catch (err) { console.error('Ошибка создания уезда:', err) }
-    },
-    async createNewVolost() {
-      const name = this.volostSearch.trim()
-      if (!name) return
-      try {
-        const newItem = await api('/api/volosts/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
-        this.volosts.push(newItem); this.formData.volost_id = newItem.volost_id; this.volostSearch = newItem.name; this.volostDropOpen = false
-      } catch (err) { console.error('Ошибка создания волости:', err) }
-    },
-    async createNewVillage() {
-      const name = this.villageSearch.trim()
-      if (!name) return
-      try {
-        const newItem = await api('/api/villages/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
-        this.villages.push(newItem); this.formData.village_id = newItem.village_id; this.villageSearch = newItem.name; this.villageDropOpen = false
-      } catch (err) { console.error('Ошибка создания населенного пункта:', err) }
-    },
-
     async loadReferenceData() {
       this.loading = true
       try {
@@ -1157,7 +1478,6 @@ export default {
         this.formData.death_month = record.death_month || ''
         this.formData.death_day = record.death_day || ''
         this.formData.burial_day = record.burial_day || ''
-        this.formData.age = record.age || ''
         this.formData.cause_of_death = record.cause_of_death || ''
         this.formData.burial_place = record.burial_place || ''
         this.formData.comment = record.comment || ''
@@ -1171,6 +1491,10 @@ export default {
           }
         }
 
+        // Возраст
+        this.parseAgeFromRecord(record)
+
+        // Локации
         this.formData.province_id = record.province || null
         if (record.province) {
           const found = this.provinces.find(p => p.province_id === record.province)
@@ -1276,6 +1600,10 @@ export default {
       if (draftData.formData) {
         Object.assign(this.formData, draftData.formData)
       }
+      if (draftData.ageYears !== undefined) this.ageYears = draftData.ageYears
+      if (draftData.ageMonths !== undefined) this.ageMonths = draftData.ageMonths
+      if (draftData.ageWeeks !== undefined) this.ageWeeks = draftData.ageWeeks
+      if (draftData.ageDays !== undefined) this.ageDays = draftData.ageDays
       if (draftData.numberRecordMale) this.numberRecordMale = draftData.numberRecordMale
       if (draftData.numberRecordFemale) this.numberRecordFemale = draftData.numberRecordFemale
       if (draftData.archiveSearch) this.archiveSearch = draftData.archiveSearch
@@ -1293,6 +1621,12 @@ export default {
           dropOpen: false, dropItems: []
         }))
       }
+      
+      // Синхронизация возраста из черновика в formData
+      if (this.ageYears !== undefined) this.formData.age_years = this.ageYears
+      if (this.ageMonths !== undefined) this.formData.age_months = this.ageMonths
+      if (this.ageWeeks !== undefined) this.formData.age_weeks = this.ageWeeks
+      if (this.ageDays !== undefined) this.formData.age_days = this.ageDays
     },
 
     checkLocation() {
@@ -1317,7 +1651,7 @@ export default {
       if (fieldName === 'location') return !this.checkLocation()
       const value = this.formData[fieldName]
       const isEmpty = value === null || value === undefined || value === '' || value === 0
-      const requiredFields = ['number_case', 'year', 'page', 'number_record', 'death_month', 'death_day', 'sex', 'name', 'surname']
+      const requiredFields = ['number_case', 'year', 'page', 'number_record', 'death_month', 'death_day', 'sex', 'name', 'surname', 'kinship_id']
       if (!requiredFields.includes(fieldName)) return false
       if (fieldName === 'number_case' && this.formData.archive_id && this.archiveSearch.trim()) return false
       if (fieldName === 'year' && this.formData.archive_id && this.archiveSearch.trim()) return false
@@ -1325,7 +1659,7 @@ export default {
     },
 
     validateAllFields() {
-      const requiredFields = ['number_case', 'year', 'page', 'number_record', 'death_month', 'death_day', 'sex', 'name', 'surname', 'location']
+      const requiredFields = ['number_case', 'year', 'page', 'number_record', 'death_month', 'death_day', 'sex', 'name', 'surname', 'kinship_id', 'location']
       const missing = []
       for (const field of requiredFields) {
         if (this.isFieldMissing(field)) missing.push(field)
@@ -1394,15 +1728,6 @@ export default {
     updateNumberRecord() {
       if (this.formData.sex === 'М') this.numberRecordMale = this.formData.number_record
       else if (this.formData.sex === 'Ж') this.numberRecordFemale = this.formData.number_record
-    },
-
-    incrementAge() {
-      const v = parseInt(this.formData.age) || 0
-      if (v < 120) this.formData.age = v + 1
-    },
-    decrementAge() {
-      const v = parseInt(this.formData.age) || 0
-      if (v > 0) this.formData.age = v - 1
     },
 
     autoBurialDay() {
@@ -1572,6 +1897,10 @@ export default {
     buildFullPayload() {
       return {
         formData: { ...this.formData },
+        ageYears: this.ageYears,
+        ageMonths: this.ageMonths,
+        ageWeeks: this.ageWeeks,
+        ageDays: this.ageDays,
         archiveSearch: this.archiveSearch,
         provinceSearch: this.provinceSearch,
         yezdSearch: this.yezdSearch,
@@ -1596,15 +1925,6 @@ export default {
         if (sexValue === 'Женский') sexValue = 'Ж'
         if (sexValue === 'мужской') sexValue = 'М'
         if (sexValue === 'женский') sexValue = 'Ж'
-        
-        if (!sexValue || (sexValue !== 'М' && sexValue !== 'Ж')) {
-          const selectEl = document.querySelector('select[v-model="formData.sex"]')
-          if (selectEl && selectEl.value) {
-            sexValue = selectEl.value
-            if (sexValue === 'Мужской') sexValue = 'М'
-            if (sexValue === 'Женский') sexValue = 'Ж'
-          }
-        }
         
         if (!sexValue || (sexValue !== 'М' && sexValue !== 'Ж')) {
           const surname = this.formData.surname || ''
@@ -1659,6 +1979,9 @@ export default {
 
         const deathDate = `${this.formData.year}-${String(this.formData.death_month).padStart(2,'0')}-${String(this.formData.death_day).padStart(2,'0')}`
 
+        // Синхронизируем возраст перед отправкой
+        this.syncAgeToFormData()
+
         const deathRecordData = {
           archive: Number(archiveId),
           page: this.formData.page ? Number(this.formData.page) : null,
@@ -1674,7 +1997,10 @@ export default {
           death_day: this.formData.death_day ? Number(this.formData.death_day) : null,
           burial_day: this.formData.burial_day ? Number(this.formData.burial_day) : null,
           estate: this.formData.estate_id ? Number(this.formData.estate_id) : null,
-          age: this.formData.age ? Number(this.formData.age) : null,
+          age_years: this.formData.age_years ? Number(this.formData.age_years) : null,
+          age_months: this.formData.age_months ? Number(this.formData.age_months) : null,
+          age_weeks: this.formData.age_weeks ? Number(this.formData.age_weeks) : null,
+          age_days: this.formData.age_days ? Number(this.formData.age_days) : null,
           cause_of_death: this.formData.cause_of_death || '',
           burial_place: this.formData.burial_place || '',
           comment: this.formData.comment || '',
@@ -1763,7 +2089,6 @@ export default {
         }
 
         // Создаём родственников
-        // Создаём родственников
         for (const r of this.relatives) {
           if (!r.name && !r.surname) continue
           
@@ -1793,14 +2118,12 @@ export default {
             })
           })
           
-          // ПРАВИЛЬНАЯ СВЯЗЬ: умерший (who) - КЕМ ПРИХОДИТСЯ - родственнику (whom)
-          // Это означает: для родственника мы указываем, кем является умерший
           if (this.formData.kinship_id) {
             await api('/api/relationships/', {
               method: 'POST', headers: H,
               body: JSON.stringify({
-                who: this.existingPersonId,      // умерший
-                whom: relPerson.person_id,       // родственник
+                who: this.existingPersonId,
+                whom: relPerson.person_id,
                 kinship: Number(this.formData.kinship_id),
               })
             }).catch(err => console.error('Ошибка создания родства:', err))
@@ -1875,6 +2198,67 @@ export default {
 </script>
 
 <style scoped>
+/* Стили для блока возраста */
+.age-header {
+  margin-bottom: 12px;
+}
+.age-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+  display: block;
+}
+.age-fields {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.age-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #c8c5c0;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.age-field input {
+  width: 60px;
+  border: none;
+  padding: 6px 0;
+  text-align: center;
+  font-size: 13px;
+  -moz-appearance: textfield;
+}
+.age-field input::-webkit-outer-spin-button,
+.age-field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.age-field input:focus {
+  outline: none;
+}
+.age-field span {
+  font-size: 12px;
+  color: #888;
+  min-width: 32px;
+}
+
+@media (max-width: 600px) {
+  .age-fields {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .age-field {
+    justify-content: space-between;
+  }
+  .age-field input {
+    width: 80px;
+  }
+}
+
+/* Остальные стили (сохраняем из оригинального Death) */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -2082,48 +2466,6 @@ export default {
   padding: 8px 0;
 }
 .checkbox-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
-
-.age-wrap {
-  display: flex;
-  align-items: center;
-  border: 1px solid #c8c5c0;
-  border-radius: 6px;
-  overflow: hidden;
-  width: 110px;
-}
-.age-btn {
-  width: 32px;
-  height: 34px;
-  border: none;
-  background: #f0efee;
-  color: #5f5e5a;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background .15s;
-  flex-shrink: 0;
-}
-.age-btn:hover { background: #e9e7e3; }
-.age-input {
-  flex: 1;
-  border: none !important;
-  border-radius: 0 !important;
-  text-align: center;
-  font-weight: 600;
-  min-width: 0;
-  border-left: 1px solid #c8c5c0 !important;
-  border-right: 1px solid #c8c5c0 !important;
-  box-shadow: none !important;
-  height: 34px;
-  padding: 0;
-  -moz-appearance: textfield;
-}
-.age-input::-webkit-outer-spin-button,
-.age-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.age-input:focus { background: #fffbeb; outline: none; }
 
 .record-number-wrapper { display: flex; align-items: center; gap: 8px; }
 .record-gender-badge {

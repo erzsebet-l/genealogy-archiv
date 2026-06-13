@@ -159,16 +159,16 @@
               <div class="field">
                 <label>Губерния</label>
                 <div class="combobox-wrap">
-                  <input type="text" v-model="husbandProvinceSearch" @input="husbandProvinceDropOpen = true; formData.husband_province_id = null"
+                  <input type="text" v-model="husbandProvinceSearch" @input="onHusbandProvinceInput"
                     @focus="husbandProvinceDropOpen = true" @blur="onHusbandProvinceBlur"
                     autocomplete="off" class="combo-input" />
                   <ul v-show="husbandProvinceDropOpen && filteredHusbandProvinces.length" class="drop-list">
                     <li v-for="p in filteredHusbandProvinces" :key="p.province_id"
-                      @mousedown.prevent="selectHusbandLocation('province', p)" class="drop-item">
+                      @mousedown.prevent="selectHusbandProvince(p)" class="drop-item">
                       <span class="drop-main">{{ p.name }}</span>
                     </li>
                     <li v-if="husbandProvinceSearch.trim() && !husbandProvinceExactMatch"
-                      @mousedown.prevent="createNewLocation('husband', 'province')" class="drop-item drop-new">
+                      @mousedown.prevent="createNewHusbandProvince" class="drop-item drop-new">
                       ＋ Создать «{{ husbandProvinceSearch.trim() }}»
                     </li>
                   </ul>
@@ -177,13 +177,17 @@
               <div class="field">
                 <label>Уезд</label>
                 <div class="combobox-wrap">
-                  <input type="text" v-model="husbandYezdSearch" @input="husbandYezdDropOpen = true; formData.husband_yezd_id = null"
-                    @focus="husbandYezdDropOpen = true" @blur="closeHusbandYezdDrop"
+                  <input type="text" v-model="husbandYezdSearch" @input="onHusbandYezdInput"
+                    @focus="husbandYezdDropOpen = true" @blur="onHusbandYezdBlur"
                     autocomplete="off" class="combo-input" />
-                  <ul v-show="husbandYezdDropOpen && filterItems(yezds, husbandYezdSearch, 'yezd_id').length" class="drop-list">
-                    <li v-for="y in filterItems(yezds, husbandYezdSearch, 'yezd_id')" :key="y.yezd_id"
-                      @mousedown.prevent="selectHusbandLocation('yezd', y)" class="drop-item">
+                  <ul v-show="husbandYezdDropOpen && filteredHusbandYezds.length" class="drop-list">
+                    <li v-for="y in filteredHusbandYezds" :key="y.yezd_id"
+                      @mousedown.prevent="selectHusbandYezd(y)" class="drop-item">
                       <span class="drop-main">{{ y.name }}</span>
+                    </li>
+                    <li v-if="husbandYezdSearch.trim() && !husbandYezdExactMatch"
+                      @mousedown.prevent="createNewHusbandYezd" class="drop-item drop-new">
+                      ＋ Создать «{{ husbandYezdSearch.trim() }}»
                     </li>
                   </ul>
                 </div>
@@ -193,13 +197,17 @@
               <div class="field">
                 <label>Волость</label>
                 <div class="combobox-wrap">
-                  <input type="text" v-model="husbandVolostSearch" @input="husbandVolostDropOpen = true; formData.husband_volost_id = null"
-                    @focus="husbandVolostDropOpen = true" @blur="closeHusbandVolostDrop"
+                  <input type="text" v-model="husbandVolostSearch" @input="onHusbandVolostInput"
+                    @focus="husbandVolostDropOpen = true" @blur="onHusbandVolostBlur"
                     autocomplete="off" class="combo-input" />
-                  <ul v-show="husbandVolostDropOpen && filterItems(volosts, husbandVolostSearch, 'volost_id').length" class="drop-list">
-                    <li v-for="v in filterItems(volosts, husbandVolostSearch, 'volost_id')" :key="v.volost_id"
-                      @mousedown.prevent="selectHusbandLocation('volost', v)" class="drop-item">
+                  <ul v-show="husbandVolostDropOpen && filteredHusbandVolosts.length" class="drop-list">
+                    <li v-for="v in filteredHusbandVolosts" :key="v.volost_id"
+                      @mousedown.prevent="selectHusbandVolost(v)" class="drop-item">
                       <span class="drop-main">{{ v.name }}</span>
+                    </li>
+                    <li v-if="husbandVolostSearch.trim() && !husbandVolostExactMatch"
+                      @mousedown.prevent="createNewHusbandVolost" class="drop-item drop-new">
+                      ＋ Создать «{{ husbandVolostSearch.trim() }}»
                     </li>
                   </ul>
                 </div>
@@ -207,13 +215,17 @@
               <div class="field">
                 <label>Село / Населённый пункт</label>
                 <div class="combobox-wrap">
-                  <input type="text" v-model="husbandVillageSearch" @input="husbandVillageDropOpen = true; formData.husband_village_id = null"
-                    @focus="husbandVillageDropOpen = true" @blur="closeHusbandVillageDrop"
+                  <input type="text" v-model="husbandVillageSearch" @input="onHusbandVillageInput"
+                    @focus="husbandVillageDropOpen = true" @blur="onHusbandVillageBlur"
                     autocomplete="off" class="combo-input" />
-                  <ul v-show="husbandVillageDropOpen && filterItems(villages, husbandVillageSearch, 'village_id').length" class="drop-list">
-                    <li v-for="v in filterItems(villages, husbandVillageSearch, 'village_id')" :key="v.village_id"
-                      @mousedown.prevent="selectHusbandLocation('village', v)" class="drop-item">
+                  <ul v-show="husbandVillageDropOpen && filteredHusbandVillages.length" class="drop-list">
+                    <li v-for="v in filteredHusbandVillages" :key="v.village_id"
+                      @mousedown.prevent="selectHusbandVillage(v)" class="drop-item">
                       <span class="drop-main">{{ v.name }}</span>
+                    </li>
+                    <li v-if="husbandVillageSearch.trim() && !husbandVillageExactMatch"
+                      @mousedown.prevent="createNewHusbandVillage" class="drop-item drop-new">
+                      ＋ Создать «{{ husbandVillageSearch.trim() }}»
                     </li>
                   </ul>
                 </div>
@@ -302,13 +314,17 @@
               <div class="field">
                 <label>Губерния</label>
                 <div class="combobox-wrap">
-                  <input type="text" v-model="wifeProvinceSearch" @input="wifeProvinceDropOpen = true; formData.wife_province_id = null"
-                    @focus="wifeProvinceDropOpen = true" @blur="closeWifeProvinceDrop"
+                  <input type="text" v-model="wifeProvinceSearch" @input="onWifeProvinceInput"
+                    @focus="wifeProvinceDropOpen = true" @blur="onWifeProvinceBlur"
                     autocomplete="off" class="combo-input" />
-                  <ul v-show="wifeProvinceDropOpen && filterItems(provinces, wifeProvinceSearch, 'province_id').length" class="drop-list">
-                    <li v-for="p in filterItems(provinces, wifeProvinceSearch, 'province_id')" :key="p.province_id"
-                      @mousedown.prevent="selectWifeLocation('province', p)" class="drop-item">
+                  <ul v-show="wifeProvinceDropOpen && filteredWifeProvinces.length" class="drop-list">
+                    <li v-for="p in filteredWifeProvinces" :key="p.province_id"
+                      @mousedown.prevent="selectWifeProvince(p)" class="drop-item">
                       <span class="drop-main">{{ p.name }}</span>
+                    </li>
+                    <li v-if="wifeProvinceSearch.trim() && !wifeProvinceExactMatch"
+                      @mousedown.prevent="createNewWifeProvince" class="drop-item drop-new">
+                      ＋ Создать «{{ wifeProvinceSearch.trim() }}»
                     </li>
                   </ul>
                 </div>
@@ -316,13 +332,17 @@
               <div class="field">
                 <label>Уезд</label>
                 <div class="combobox-wrap">
-                  <input type="text" v-model="wifeYezdSearch" @input="wifeYezdDropOpen = true; formData.wife_yezd_id = null"
-                    @focus="wifeYezdDropOpen = true" @blur="closeWifeYezdDrop"
+                  <input type="text" v-model="wifeYezdSearch" @input="onWifeYezdInput"
+                    @focus="wifeYezdDropOpen = true" @blur="onWifeYezdBlur"
                     autocomplete="off" class="combo-input" />
-                  <ul v-show="wifeYezdDropOpen && filterItems(yezds, wifeYezdSearch, 'yezd_id').length" class="drop-list">
-                    <li v-for="y in filterItems(yezds, wifeYezdSearch, 'yezd_id')" :key="y.yezd_id"
-                      @mousedown.prevent="selectWifeLocation('yezd', y)" class="drop-item">
+                  <ul v-show="wifeYezdDropOpen && filteredWifeYezds.length" class="drop-list">
+                    <li v-for="y in filteredWifeYezds" :key="y.yezd_id"
+                      @mousedown.prevent="selectWifeYezd(y)" class="drop-item">
                       <span class="drop-main">{{ y.name }}</span>
+                    </li>
+                    <li v-if="wifeYezdSearch.trim() && !wifeYezdExactMatch"
+                      @mousedown.prevent="createNewWifeYezd" class="drop-item drop-new">
+                      ＋ Создать «{{ wifeYezdSearch.trim() }}»
                     </li>
                   </ul>
                 </div>
@@ -332,13 +352,17 @@
               <div class="field">
                 <label>Волость</label>
                 <div class="combobox-wrap">
-                  <input type="text" v-model="wifeVolostSearch" @input="wifeVolostDropOpen = true; formData.wife_volost_id = null"
-                    @focus="wifeVolostDropOpen = true" @blur="closeWifeVolostDrop"
+                  <input type="text" v-model="wifeVolostSearch" @input="onWifeVolostInput"
+                    @focus="wifeVolostDropOpen = true" @blur="onWifeVolostBlur"
                     autocomplete="off" class="combo-input" />
-                  <ul v-show="wifeVolostDropOpen && filterItems(volosts, wifeVolostSearch, 'volost_id').length" class="drop-list">
-                    <li v-for="v in filterItems(volosts, wifeVolostSearch, 'volost_id')" :key="v.volost_id"
-                      @mousedown.prevent="selectWifeLocation('volost', v)" class="drop-item">
+                  <ul v-show="wifeVolostDropOpen && filteredWifeVolosts.length" class="drop-list">
+                    <li v-for="v in filteredWifeVolosts" :key="v.volost_id"
+                      @mousedown.prevent="selectWifeVolost(v)" class="drop-item">
                       <span class="drop-main">{{ v.name }}</span>
+                    </li>
+                    <li v-if="wifeVolostSearch.trim() && !wifeVolostExactMatch"
+                      @mousedown.prevent="createNewWifeVolost" class="drop-item drop-new">
+                      ＋ Создать «{{ wifeVolostSearch.trim() }}»
                     </li>
                   </ul>
                 </div>
@@ -346,13 +370,17 @@
               <div class="field">
                 <label>Село / Населённый пункт</label>
                 <div class="combobox-wrap">
-                  <input type="text" v-model="wifeVillageSearch" @input="wifeVillageDropOpen = true; formData.wife_village_id = null"
-                    @focus="wifeVillageDropOpen = true" @blur="closeWifeVillageDrop"
+                  <input type="text" v-model="wifeVillageSearch" @input="onWifeVillageInput"
+                    @focus="wifeVillageDropOpen = true" @blur="onWifeVillageBlur"
                     autocomplete="off" class="combo-input" />
-                  <ul v-show="wifeVillageDropOpen && filterItems(villages, wifeVillageSearch, 'village_id').length" class="drop-list">
-                    <li v-for="v in filterItems(villages, wifeVillageSearch, 'village_id')" :key="v.village_id"
-                      @mousedown.prevent="selectWifeLocation('village', v)" class="drop-item">
+                  <ul v-show="wifeVillageDropOpen && filteredWifeVillages.length" class="drop-list">
+                    <li v-for="v in filteredWifeVillages" :key="v.village_id"
+                      @mousedown.prevent="selectWifeVillage(v)" class="drop-item">
                       <span class="drop-main">{{ v.name }}</span>
+                    </li>
+                    <li v-if="wifeVillageSearch.trim() && !wifeVillageExactMatch"
+                      @mousedown.prevent="createNewWifeVillage" class="drop-item drop-new">
+                      ＋ Создать «{{ wifeVillageSearch.trim() }}»
                     </li>
                   </ul>
                 </div>
@@ -372,16 +400,16 @@
               </div>
               <div v-if="showFieldError('wife_estate_id')" class="error-message">Обязательно для заполнения</div>
             </div>
-            <div class="field" :class="{ 'field-error': showFieldError('wife_status') }">
-              <label>Статус невесты <span class="req-star">*</span></label>
+            <div class="field" :class="{ 'field-error': showFieldError('wife_creed_id') }">
+              <label>Вероисповедание <span class="req-star">*</span></label>
               <div class="field-with-add">
-                <select v-model="formData.wife_status" :class="{ 'error-input': showFieldError('wife_status') }">
+                <select v-model="formData.wife_creed_id" :class="{ 'error-input': showFieldError('wife_creed_id') }">
                   <option value="">Выберите</option>
-                  <option v-for="s in motherStatuses" :key="s.status_choice_id" :value="s.name">{{ s.name }}</option>
+                  <option v-for="r in religions" :key="r.creed_id" :value="r.creed_id">{{ r.name }}</option>
                 </select>
-                <button type="button" class="btn-add-ref" @click="openModal('wife_status')" title="Добавить статус">＋</button>
+                <button type="button" class="btn-add-ref" @click="openModal('religion')">＋</button>
               </div>
-              <div v-if="showFieldError('wife_status')" class="error-message">Обязательно для заполнения</div>
+              <div v-if="showFieldError('wife_creed_id')" class="error-message">Обязательно для заполнения</div>
             </div>
           </div>
 
@@ -436,13 +464,7 @@
           <div v-for="(g, i) in maleGuarantors" :key="'mg'+i" class="sub-block">
             <div class="sub-block-header">
               <span>Поручитель #{{ i + 1 }}</span>
-              <div class="header-actions">
-                <button type="button" class="btn-auto-fill"
-                  @click="autoFillGuarantorLocation(g, 'husband')"
-                  :disabled="!formData.husband_province_id && !formData.husband_yezd_id && !formData.husband_volost_id && !formData.husband_village_id"
-                  title="Заполнить как у жениха">⚡ Авто (жених)</button>
-                <button type="button" class="btn-remove" @click="maleGuarantors.splice(i, 1)" v-if="maleGuarantors.length > 1">✕</button>
-              </div>
+              <button type="button" class="btn-remove" @click="maleGuarantors.splice(i, 1)" v-if="maleGuarantors.length > 1">✕</button>
             </div>
 
             <div class="row two">
@@ -450,33 +472,31 @@
                 <label>Губерния</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="g.provinceSearch"
-                    @input="g.provinceDropOpen = true; g.province_id = ''; g.provinceAuto = false"
+                    @input="g.provinceDropOpen = true; g.province_id = ''"
                     @focus="g.provinceDropOpen = true" @blur="closeGodDrop(g, 'provinceDropOpen')"
-                    autocomplete="off" class="combo-input" :class="{ auto: g.provinceAuto }" />
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="g.provinceDropOpen && filterItems(provinces, g.provinceSearch, 'province_id').length" class="drop-list">
                     <li v-for="p in filterItems(provinces, g.provinceSearch, 'province_id')" :key="p.province_id"
-                      @mousedown.prevent="g.province_id = p.province_id; g.provinceSearch = p.name; g.provinceDropOpen = false; g.provinceAuto = false" class="drop-item">
+                      @mousedown.prevent="g.province_id = p.province_id; g.provinceSearch = p.name; g.provinceDropOpen = false" class="drop-item">
                       <span class="drop-main">{{ p.name }}</span>
                     </li>
                   </ul>
                 </div>
-                <div v-if="g.provinceAuto" class="auto-hint">⚡ Как у жениха</div>
               </div>
               <div class="field">
                 <label>Уезд</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="g.yezdSearch"
-                    @input="g.yezdDropOpen = true; g.yezd_id = ''; g.yezdAuto = false"
+                    @input="g.yezdDropOpen = true; g.yezd_id = ''"
                     @focus="g.yezdDropOpen = true" @blur="closeGodDrop(g, 'yezdDropOpen')"
-                    autocomplete="off" class="combo-input" :class="{ auto: g.yezdAuto }" />
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="g.yezdDropOpen && filterItems(yezds, g.yezdSearch, 'yezd_id').length" class="drop-list">
                     <li v-for="y in filterItems(yezds, g.yezdSearch, 'yezd_id')" :key="y.yezd_id"
-                      @mousedown.prevent="g.yezd_id = y.yezd_id; g.yezdSearch = y.name; g.yezdDropOpen = false; g.yezdAuto = false" class="drop-item">
+                      @mousedown.prevent="g.yezd_id = y.yezd_id; g.yezdSearch = y.name; g.yezdDropOpen = false" class="drop-item">
                       <span class="drop-main">{{ y.name }}</span>
                     </li>
                   </ul>
                 </div>
-                <div v-if="g.yezdAuto" class="auto-hint">⚡ Как у жениха</div>
               </div>
             </div>
             <div class="row two">
@@ -484,54 +504,50 @@
                 <label>Волость</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="g.volostSearch"
-                    @input="g.volostDropOpen = true; g.volost_id = ''; g.volostAuto = false"
+                    @input="g.volostDropOpen = true; g.volost_id = ''"
                     @focus="g.volostDropOpen = true" @blur="closeGodDrop(g, 'volostDropOpen')"
-                    autocomplete="off" class="combo-input" :class="{ auto: g.volostAuto }" />
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="g.volostDropOpen && filterItems(volosts, g.volostSearch, 'volost_id').length" class="drop-list">
                     <li v-for="v in filterItems(volosts, g.volostSearch, 'volost_id')" :key="v.volost_id"
-                      @mousedown.prevent="g.volost_id = v.volost_id; g.volostSearch = v.name; g.volostDropOpen = false; g.volostAuto = false" class="drop-item">
+                      @mousedown.prevent="g.volost_id = v.volost_id; g.volostSearch = v.name; g.volostDropOpen = false" class="drop-item">
                       <span class="drop-main">{{ v.name }}</span>
                     </li>
                   </ul>
                 </div>
-                <div v-if="g.volostAuto" class="auto-hint">⚡ Как у жениха</div>
               </div>
               <div class="field">
                 <label>Село</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="g.villageSearch"
-                    @input="g.villageDropOpen = true; g.village_id = ''; g.villageAuto = false"
+                    @input="g.villageDropOpen = true; g.village_id = ''"
                     @focus="g.villageDropOpen = true" @blur="closeGodDrop(g, 'villageDropOpen')"
-                    autocomplete="off" class="combo-input" :class="{ auto: g.villageAuto }" />
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="g.villageDropOpen && filterItems(villages, g.villageSearch, 'village_id').length" class="drop-list">
                     <li v-for="v in filterItems(villages, g.villageSearch, 'village_id')" :key="v.village_id"
-                      @mousedown.prevent="g.village_id = v.village_id; g.villageSearch = v.name; g.villageDropOpen = false; g.villageAuto = false" class="drop-item">
+                      @mousedown.prevent="g.village_id = v.village_id; g.villageSearch = v.name; g.villageDropOpen = false" class="drop-item">
                       <span class="drop-main">{{ v.name }}</span>
                     </li>
                   </ul>
                 </div>
-                <div v-if="g.villageAuto" class="auto-hint">⚡ Как у жениха</div>
               </div>
             </div>
             <div class="row two">
               <div class="field">
                 <label>Сословие</label>
                 <div class="field-with-add">
-                  <select v-model="g.estate_id" :class="{ auto: g.estateAuto }" @change="g.estateAuto = false">
+                  <select v-model="g.estate_id">
                     <option value="">Выберите</option>
                     <option v-for="e in estates" :key="e.estate_id" :value="e.estate_id">{{ e.name }}</option>
                   </select>
                   <button type="button" class="btn-add-ref" @click="openModal('estate')">＋</button>
                 </div>
-                <div v-if="g.estateAuto" class="auto-hint">⚡ Как у жениха</div>
               </div>
               <div class="field">
                 <label>Вероисповедание</label>
-                <select v-model="g.creed_id" :class="{ auto: g.creedAuto }" @change="g.creedAuto = false">
+                <select v-model="g.creed_id">
                   <option value="">Выберите</option>
                   <option v-for="r in religions" :key="r.creed_id" :value="r.creed_id">{{ r.name }}</option>
                 </select>
-                <div v-if="g.creedAuto" class="auto-hint">⚡ Как у жениха</div>
               </div>
             </div>
             <div class="row three">
@@ -561,13 +577,7 @@
           <div v-for="(g, i) in femaleGuarantors" :key="'fg'+i" class="sub-block">
             <div class="sub-block-header">
               <span>Поручительница #{{ i + 1 }}</span>
-              <div class="header-actions">
-                <button type="button" class="btn-auto-fill"
-                  @click="autoFillGuarantorLocation(g, 'wife')"
-                  :disabled="!formData.wife_province_id && !formData.wife_yezd_id && !formData.wife_volost_id && !formData.wife_village_id"
-                  title="Заполнить как у невесты">⚡ Авто (невеста)</button>
-                <button type="button" class="btn-remove" @click="femaleGuarantors.splice(i, 1)" v-if="femaleGuarantors.length > 1">✕</button>
-              </div>
+              <button type="button" class="btn-remove" @click="femaleGuarantors.splice(i, 1)" v-if="femaleGuarantors.length > 1">✕</button>
             </div>
 
             <div class="row two">
@@ -575,33 +585,31 @@
                 <label>Губерния</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="g.provinceSearch"
-                    @input="g.provinceDropOpen = true; g.province_id = ''; g.provinceAuto = false"
+                    @input="g.provinceDropOpen = true; g.province_id = ''"
                     @focus="g.provinceDropOpen = true" @blur="closeGodDrop(g, 'provinceDropOpen')"
-                    autocomplete="off" class="combo-input" :class="{ auto: g.provinceAuto }" />
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="g.provinceDropOpen && filterItems(provinces, g.provinceSearch, 'province_id').length" class="drop-list">
                     <li v-for="p in filterItems(provinces, g.provinceSearch, 'province_id')" :key="p.province_id"
-                      @mousedown.prevent="g.province_id = p.province_id; g.provinceSearch = p.name; g.provinceDropOpen = false; g.provinceAuto = false" class="drop-item">
+                      @mousedown.prevent="g.province_id = p.province_id; g.provinceSearch = p.name; g.provinceDropOpen = false" class="drop-item">
                       <span class="drop-main">{{ p.name }}</span>
                     </li>
                   </ul>
                 </div>
-                <div v-if="g.provinceAuto" class="auto-hint">⚡ Как у невесты</div>
               </div>
               <div class="field">
                 <label>Уезд</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="g.yezdSearch"
-                    @input="g.yezdDropOpen = true; g.yezd_id = ''; g.yezdAuto = false"
+                    @input="g.yezdDropOpen = true; g.yezd_id = ''"
                     @focus="g.yezdDropOpen = true" @blur="closeGodDrop(g, 'yezdDropOpen')"
-                    autocomplete="off" class="combo-input" :class="{ auto: g.yezdAuto }" />
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="g.yezdDropOpen && filterItems(yezds, g.yezdSearch, 'yezd_id').length" class="drop-list">
                     <li v-for="y in filterItems(yezds, g.yezdSearch, 'yezd_id')" :key="y.yezd_id"
-                      @mousedown.prevent="g.yezd_id = y.yezd_id; g.yezdSearch = y.name; g.yezdDropOpen = false; g.yezdAuto = false" class="drop-item">
+                      @mousedown.prevent="g.yezd_id = y.yezd_id; g.yezdSearch = y.name; g.yezdDropOpen = false" class="drop-item">
                       <span class="drop-main">{{ y.name }}</span>
                     </li>
                   </ul>
                 </div>
-                <div v-if="g.yezdAuto" class="auto-hint">⚡ Как у невесты</div>
               </div>
             </div>
             <div class="row two">
@@ -609,54 +617,50 @@
                 <label>Волость</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="g.volostSearch"
-                    @input="g.volostDropOpen = true; g.volost_id = ''; g.volostAuto = false"
+                    @input="g.volostDropOpen = true; g.volost_id = ''"
                     @focus="g.volostDropOpen = true" @blur="closeGodDrop(g, 'volostDropOpen')"
-                    autocomplete="off" class="combo-input" :class="{ auto: g.volostAuto }" />
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="g.volostDropOpen && filterItems(volosts, g.volostSearch, 'volost_id').length" class="drop-list">
                     <li v-for="v in filterItems(volosts, g.volostSearch, 'volost_id')" :key="v.volost_id"
-                      @mousedown.prevent="g.volost_id = v.volost_id; g.volostSearch = v.name; g.volostDropOpen = false; g.volostAuto = false" class="drop-item">
+                      @mousedown.prevent="g.volost_id = v.volost_id; g.volostSearch = v.name; g.volostDropOpen = false" class="drop-item">
                       <span class="drop-main">{{ v.name }}</span>
                     </li>
                   </ul>
                 </div>
-                <div v-if="g.volostAuto" class="auto-hint">⚡ Как у невесты</div>
               </div>
               <div class="field">
                 <label>Село</label>
                 <div class="combobox-wrap">
                   <input type="text" v-model="g.villageSearch"
-                    @input="g.villageDropOpen = true; g.village_id = ''; g.villageAuto = false"
+                    @input="g.villageDropOpen = true; g.village_id = ''"
                     @focus="g.villageDropOpen = true" @blur="closeGodDrop(g, 'villageDropOpen')"
-                    autocomplete="off" class="combo-input" :class="{ auto: g.villageAuto }" />
+                    autocomplete="off" class="combo-input" />
                   <ul v-show="g.villageDropOpen && filterItems(villages, g.villageSearch, 'village_id').length" class="drop-list">
                     <li v-for="v in filterItems(villages, g.villageSearch, 'village_id')" :key="v.village_id"
-                      @mousedown.prevent="g.village_id = v.village_id; g.villageSearch = v.name; g.villageDropOpen = false; g.villageAuto = false" class="drop-item">
+                      @mousedown.prevent="g.village_id = v.village_id; g.villageSearch = v.name; g.villageDropOpen = false" class="drop-item">
                       <span class="drop-main">{{ v.name }}</span>
                     </li>
                   </ul>
                 </div>
-                <div v-if="g.villageAuto" class="auto-hint">⚡ Как у невесты</div>
               </div>
             </div>
             <div class="row two">
               <div class="field">
                 <label>Сословие</label>
                 <div class="field-with-add">
-                  <select v-model="g.estate_id" :class="{ auto: g.estateAuto }" @change="g.estateAuto = false">
+                  <select v-model="g.estate_id">
                     <option value="">Выберите</option>
                     <option v-for="e in estates" :key="e.estate_id" :value="e.estate_id">{{ e.name }}</option>
                   </select>
                   <button type="button" class="btn-add-ref" @click="openModal('estate')">＋</button>
                 </div>
-                <div v-if="g.estateAuto" class="auto-hint">⚡ Как у невесты</div>
               </div>
               <div class="field">
                 <label>Вероисповедание</label>
-                <select v-model="g.creed_id" :class="{ auto: g.creedAuto }" @change="g.creedAuto = false">
+                <select v-model="g.creed_id">
                   <option value="">Выберите</option>
                   <option v-for="r in religions" :key="r.creed_id" :value="r.creed_id">{{ r.name }}</option>
                 </select>
-                <div v-if="g.creedAuto" class="auto-hint">⚡ Как у невесты</div>
               </div>
             </div>
             <div class="row three">
@@ -676,7 +680,7 @@
           </div>
         </section>
 
-        <!-- ───────────── БЛОК: СВЯЩЕННОСЛУЖИТЕЛИ (только имя и фамилия) ───────────── -->
+        <!-- ───────────── БЛОК: СВЯЩЕННОСЛУЖИТЕЛИ ───────────── -->
         <section class="block">
           <div class="block-title-row">
             <h3 class="block-title">Священнослужители</h3>
@@ -934,6 +938,7 @@ export default {
       archiveDropOpen: false,
       allArchives: [],
 
+      // Жених: поля для поиска/создания территорий
       husbandProvinceSearch: '',
       husbandProvinceDropOpen: false,
       husbandYezdSearch: '',
@@ -943,6 +948,7 @@ export default {
       husbandVillageSearch: '',
       husbandVillageDropOpen: false,
 
+      // Невеста: поля для поиска/создания территорий
       wifeProvinceSearch: '',
       wifeProvinceDropOpen: false,
       wifeYezdSearch: '',
@@ -996,6 +1002,7 @@ export default {
         wife_patronymic: '',
         wife_surname: '',
         wife_estate_id: '',
+        wife_creed_id: '',
         wife_province_id: '',
         wife_yezd_id: '',
         wife_volost_id: '',
@@ -1041,12 +1048,56 @@ export default {
       return this.allArchives.some(a => a.name.toLowerCase() === this.archiveSearch.toLowerCase().trim())
     },
 
+    // Жених: computed для фильтрации
     filteredHusbandProvinces() {
       return this.filterItems(this.provinces, this.husbandProvinceSearch, 'province_id')
     },
-
     husbandProvinceExactMatch() {
       return this.provinces.some(p => p.name.toLowerCase() === this.husbandProvinceSearch.toLowerCase().trim())
+    },
+    filteredHusbandYezds() {
+      return this.filterItems(this.yezds, this.husbandYezdSearch, 'yezd_id')
+    },
+    husbandYezdExactMatch() {
+      return this.yezds.some(y => y.name.toLowerCase() === this.husbandYezdSearch.toLowerCase().trim())
+    },
+    filteredHusbandVolosts() {
+      return this.filterItems(this.volosts, this.husbandVolostSearch, 'volost_id')
+    },
+    husbandVolostExactMatch() {
+      return this.volosts.some(v => v.name.toLowerCase() === this.husbandVolostSearch.toLowerCase().trim())
+    },
+    filteredHusbandVillages() {
+      return this.filterItems(this.villages, this.husbandVillageSearch, 'village_id')
+    },
+    husbandVillageExactMatch() {
+      return this.villages.some(v => v.name.toLowerCase() === this.husbandVillageSearch.toLowerCase().trim())
+    },
+
+    // Невеста: computed для фильтрации
+    filteredWifeProvinces() {
+      return this.filterItems(this.provinces, this.wifeProvinceSearch, 'province_id')
+    },
+    wifeProvinceExactMatch() {
+      return this.provinces.some(p => p.name.toLowerCase() === this.wifeProvinceSearch.toLowerCase().trim())
+    },
+    filteredWifeYezds() {
+      return this.filterItems(this.yezds, this.wifeYezdSearch, 'yezd_id')
+    },
+    wifeYezdExactMatch() {
+      return this.yezds.some(y => y.name.toLowerCase() === this.wifeYezdSearch.toLowerCase().trim())
+    },
+    filteredWifeVolosts() {
+      return this.filterItems(this.volosts, this.wifeVolostSearch, 'volost_id')
+    },
+    wifeVolostExactMatch() {
+      return this.volosts.some(v => v.name.toLowerCase() === this.wifeVolostSearch.toLowerCase().trim())
+    },
+    filteredWifeVillages() {
+      return this.filterItems(this.villages, this.wifeVillageSearch, 'village_id')
+    },
+    wifeVillageExactMatch() {
+      return this.villages.some(v => v.name.toLowerCase() === this.wifeVillageSearch.toLowerCase().trim())
     },
 
     scanTransformStyle() {
@@ -1066,7 +1117,6 @@ export default {
 
     await this.loadReferenceData()
 
-    // Проверка на редактирование
     const editRecordData = localStorage.getItem('edit_record')
     if (editRecordData) {
       try {
@@ -1078,7 +1128,6 @@ export default {
       } catch (e) { console.error('Ошибка загрузки данных редактирования:', e) }
     }
 
-    // Загрузка черновика
     const raw = localStorage.getItem('marriage_draft')
     if (raw) {
       try {
@@ -1113,8 +1162,6 @@ export default {
         village_id: '', province_id: '', yezd_id: '', volost_id: '',
         provinceSearch: '', yezdSearch: '', volostSearch: '', villageSearch: '',
         provinceDropOpen: false, yezdDropOpen: false, volostDropOpen: false, villageDropOpen: false,
-        provinceAuto: false, yezdAuto: false, volostAuto: false, villageAuto: false,
-        estateAuto: false, creedAuto: false,
         guarantor_id: null,
       }
     },
@@ -1201,6 +1248,9 @@ export default {
       }
     },
 
+    // ══════════════════════════════════════════════════════════════
+    // АРХИВ
+    // ══════════════════════════════════════════════════════════════
     onArchiveInput() {
       this.archiveDropOpen = true
       this.formData.archive_id = null
@@ -1257,30 +1307,13 @@ export default {
       this.autoFilledFields.archive     = false
     },
 
-    selectHusbandLocation(type, item) {
-      const map = { 
-        province: ['husband_province_id', 'husbandProvinceSearch', 'husbandProvinceDropOpen'], 
-        yezd: ['husband_yezd_id', 'husbandYezdSearch', 'husbandYezdDropOpen'], 
-        volost: ['husband_volost_id', 'husbandVolostSearch', 'husbandVolostDropOpen'], 
-        village: ['husband_village_id', 'husbandVillageSearch', 'husbandVillageDropOpen'] 
-      }
-      const [idField, searchField, dropField] = map[type]
-      const idKey = type === 'province' ? 'province_id' : type === 'yezd' ? 'yezd_id' : type === 'volost' ? 'volost_id' : 'village_id'
-      this.formData[idField] = item[idKey]
-      this[searchField]      = item.name
-      this[dropField]        = false
-    },
-
-    closeHusbandYezdDrop() {
-      setTimeout(() => { this.husbandYezdDropOpen = false }, 200)
-    },
-
-    closeHusbandVolostDrop() {
-      setTimeout(() => { this.husbandVolostDropOpen = false }, 200)
-    },
-
-    closeHusbandVillageDrop() {
-      setTimeout(() => { this.husbandVillageDropOpen = false }, 200)
+    // ══════════════════════════════════════════════════════════════
+    // ТЕРРИТОРИАЛЬНЫЕ ЕДИНИЦЫ — ЖЕНИХ
+    // ══════════════════════════════════════════════════════════════
+    onHusbandProvinceInput() {
+      this.formData.husband_province_id = null
+      this.husbandProvinceDropOpen = true
+      this.clearHusbandLocationError()
     },
 
     async onHusbandProvinceBlur() {
@@ -1291,108 +1324,396 @@ export default {
           const existing = this.provinces.find(p => p.name.toLowerCase() === name.toLowerCase())
           if (existing) {
             this.formData.husband_province_id = existing.province_id
+            this.husbandProvinceSearch = existing.name
           } else {
             try {
               const newItem = await api('/api/provinces/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
               this.provinces.push(newItem)
               this.formData.husband_province_id = newItem.province_id
               this.husbandProvinceSearch = newItem.name
-            } catch (err) { console.error(err) }
+            } catch (err) { console.error('Ошибка создания губернии:', err) }
           }
+          this.clearHusbandLocationError()
         }
       }, 200)
     },
 
-    selectWifeLocation(type, item) {
-      const map = { 
-        province: ['wife_province_id', 'wifeProvinceSearch', 'wifeProvinceDropOpen'], 
-        yezd: ['wife_yezd_id', 'wifeYezdSearch', 'wifeYezdDropOpen'], 
-        volost: ['wife_volost_id', 'wifeVolostSearch', 'wifeVolostDropOpen'], 
-        village: ['wife_village_id', 'wifeVillageSearch', 'wifeVillageDropOpen'] 
-      }
-      const [idField, searchField, dropField] = map[type]
-      const idKey = type === 'province' ? 'province_id' : type === 'yezd' ? 'yezd_id' : type === 'volost' ? 'volost_id' : 'village_id'
-      this.formData[idField] = item[idKey]
-      this[searchField]      = item.name
-      this[dropField]        = false
+    selectHusbandProvince(item) {
+      this.formData.husband_province_id = item.province_id
+      this.husbandProvinceSearch = item.name
+      this.husbandProvinceDropOpen = false
+      this.clearHusbandLocationError()
     },
 
-    closeWifeProvinceDrop() {
-      setTimeout(() => { this.wifeProvinceDropOpen = false }, 200)
-    },
-
-    closeWifeYezdDrop() {
-      setTimeout(() => { this.wifeYezdDropOpen = false }, 200)
-    },
-
-    closeWifeVolostDrop() {
-      setTimeout(() => { this.wifeVolostDropOpen = false }, 200)
-    },
-
-    closeWifeVillageDrop() {
-      setTimeout(() => { this.wifeVillageDropOpen = false }, 200)
-    },
-
-    async createNewLocation(side, type) {
-      const searchField = `${side}${type.charAt(0).toUpperCase() + type.slice(1)}Search`
-      const name = this[searchField].trim()
+    async createNewHusbandProvince() {
+      const name = this.husbandProvinceSearch.trim()
       if (!name) return
-      const endpoints = { province: '/api/provinces/', yezd: '/api/yezds/', volost: '/api/volosts/', village: '/api/villages/' }
-      const idKeys = { province: 'province_id', yezd: 'yezd_id', volost: 'volost_id', village: 'village_id' }
-      const listMap = { province: 'provinces', yezd: 'yezds', volost: 'volosts', village: 'villages' }
       try {
-        const newItem = await api(endpoints[type], { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
-        this[listMap[type]].push(newItem)
-        this.formData[`${side}_${type}_id`] = newItem[idKeys[type]]
-        this[searchField] = newItem.name
-        this[`${side}${type.charAt(0).toUpperCase() + type.slice(1)}DropOpen`] = false
-      } catch (err) { console.error(err) }
+        const newItem = await api('/api/provinces/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+        this.provinces.push(newItem)
+        this.formData.husband_province_id = newItem.province_id
+        this.husbandProvinceSearch = newItem.name
+        this.husbandProvinceDropOpen = false
+        this.clearHusbandLocationError()
+      } catch (err) { console.error('Ошибка создания губернии:', err) }
     },
 
-    autoFillGuarantorLocation(guarantor, side) {
-      const prefix = side === 'husband' ? 'husband' : 'wife'
-
-      if (this.formData[`${prefix}_province_id`]) {
-        guarantor.province_id = Number(this.formData[`${prefix}_province_id`])
-        const f = this.provinces.find(p => p.province_id === this.formData[`${prefix}_province_id`])
-        guarantor.provinceSearch = f ? f.name : ''
-        guarantor.provinceAuto = true
-      } else { guarantor.province_id = null; guarantor.provinceSearch = ''; guarantor.provinceAuto = false }
-
-      if (this.formData[`${prefix}_yezd_id`]) {
-        guarantor.yezd_id = Number(this.formData[`${prefix}_yezd_id`])
-        const f = this.yezds.find(y => y.yezd_id === this.formData[`${prefix}_yezd_id`])
-        guarantor.yezdSearch = f ? f.name : ''
-        guarantor.yezdAuto = true
-      } else { guarantor.yezd_id = null; guarantor.yezdSearch = ''; guarantor.yezdAuto = false }
-
-      if (this.formData[`${prefix}_volost_id`]) {
-        guarantor.volost_id = Number(this.formData[`${prefix}_volost_id`])
-        const f = this.volosts.find(v => v.volost_id === this.formData[`${prefix}_volost_id`])
-        guarantor.volostSearch = f ? f.name : ''
-        guarantor.volostAuto = true
-      } else { guarantor.volost_id = null; guarantor.volostSearch = ''; guarantor.volostAuto = false }
-
-      if (this.formData[`${prefix}_village_id`]) {
-        guarantor.village_id = Number(this.formData[`${prefix}_village_id`])
-        const f = this.villages.find(v => v.village_id === this.formData[`${prefix}_village_id`])
-        guarantor.villageSearch = f ? f.name : ''
-        guarantor.villageAuto = true
-      } else { guarantor.village_id = null; guarantor.villageSearch = ''; guarantor.villageAuto = false }
-
-      if (this.formData[`${prefix}_estate_id`]) {
-        guarantor.estate_id = Number(this.formData[`${prefix}_estate_id`])
-        guarantor.estateAuto = true
-      } else { guarantor.estate_id = null; guarantor.estateAuto = false }
-
-      if (this.formData.creed_id) {
-        guarantor.creed_id = Number(this.formData.creed_id)
-        guarantor.creedAuto = true
-      } else { guarantor.creed_id = null; guarantor.creedAuto = false }
-
-      this.$forceUpdate()
+    onHusbandYezdInput() {
+      this.formData.husband_yezd_id = null
+      this.husbandYezdDropOpen = true
+      this.clearHusbandLocationError()
     },
 
+    async onHusbandYezdBlur() {
+      setTimeout(async () => {
+        this.husbandYezdDropOpen = false
+        const name = this.husbandYezdSearch.trim()
+        if (name && !this.formData.husband_yezd_id) {
+          const existing = this.yezds.find(y => y.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.husband_yezd_id = existing.yezd_id
+            this.husbandYezdSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/yezds/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+              this.yezds.push(newItem)
+              this.formData.husband_yezd_id = newItem.yezd_id
+              this.husbandYezdSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания уезда:', err) }
+          }
+          this.clearHusbandLocationError()
+        }
+      }, 200)
+    },
+
+    selectHusbandYezd(item) {
+      this.formData.husband_yezd_id = item.yezd_id
+      this.husbandYezdSearch = item.name
+      this.husbandYezdDropOpen = false
+      this.clearHusbandLocationError()
+    },
+
+    async createNewHusbandYezd() {
+      const name = this.husbandYezdSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/yezds/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+        this.yezds.push(newItem)
+        this.formData.husband_yezd_id = newItem.yezd_id
+        this.husbandYezdSearch = newItem.name
+        this.husbandYezdDropOpen = false
+        this.clearHusbandLocationError()
+      } catch (err) { console.error('Ошибка создания уезда:', err) }
+    },
+
+    onHusbandVolostInput() {
+      this.formData.husband_volost_id = null
+      this.husbandVolostDropOpen = true
+      this.clearHusbandLocationError()
+    },
+
+    async onHusbandVolostBlur() {
+      setTimeout(async () => {
+        this.husbandVolostDropOpen = false
+        const name = this.husbandVolostSearch.trim()
+        if (name && !this.formData.husband_volost_id) {
+          const existing = this.volosts.find(v => v.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.husband_volost_id = existing.volost_id
+            this.husbandVolostSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/volosts/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+              this.volosts.push(newItem)
+              this.formData.husband_volost_id = newItem.volost_id
+              this.husbandVolostSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания волости:', err) }
+          }
+          this.clearHusbandLocationError()
+        }
+      }, 200)
+    },
+
+    selectHusbandVolost(item) {
+      this.formData.husband_volost_id = item.volost_id
+      this.husbandVolostSearch = item.name
+      this.husbandVolostDropOpen = false
+      this.clearHusbandLocationError()
+    },
+
+    async createNewHusbandVolost() {
+      const name = this.husbandVolostSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/volosts/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+        this.volosts.push(newItem)
+        this.formData.husband_volost_id = newItem.volost_id
+        this.husbandVolostSearch = newItem.name
+        this.husbandVolostDropOpen = false
+        this.clearHusbandLocationError()
+      } catch (err) { console.error('Ошибка создания волости:', err) }
+    },
+
+    onHusbandVillageInput() {
+      this.formData.husband_village_id = null
+      this.husbandVillageDropOpen = true
+      this.clearHusbandLocationError()
+    },
+
+    async onHusbandVillageBlur() {
+      setTimeout(async () => {
+        this.husbandVillageDropOpen = false
+        const name = this.husbandVillageSearch.trim()
+        if (name && !this.formData.husband_village_id) {
+          const existing = this.villages.find(v => v.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.husband_village_id = existing.village_id
+            this.husbandVillageSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/villages/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+              this.villages.push(newItem)
+              this.formData.husband_village_id = newItem.village_id
+              this.husbandVillageSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания населенного пункта:', err) }
+          }
+          this.clearHusbandLocationError()
+        }
+      }, 200)
+    },
+
+    selectHusbandVillage(item) {
+      this.formData.husband_village_id = item.village_id
+      this.husbandVillageSearch = item.name
+      this.husbandVillageDropOpen = false
+      this.clearHusbandLocationError()
+    },
+
+    async createNewHusbandVillage() {
+      const name = this.husbandVillageSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/villages/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+        this.villages.push(newItem)
+        this.formData.husband_village_id = newItem.village_id
+        this.husbandVillageSearch = newItem.name
+        this.husbandVillageDropOpen = false
+        this.clearHusbandLocationError()
+      } catch (err) { console.error('Ошибка создания населенного пункта:', err) }
+    },
+
+    clearHusbandLocationError() {
+      if (this.missingFieldsList.includes('husband_location')) {
+        const index = this.missingFieldsList.indexOf('husband_location')
+        this.missingFieldsList.splice(index, 1)
+      }
+    },
+
+    // ══════════════════════════════════════════════════════════════
+    // ТЕРРИТОРИАЛЬНЫЕ ЕДИНИЦЫ — НЕВЕСТА
+    // ══════════════════════════════════════════════════════════════
+    onWifeProvinceInput() {
+      this.formData.wife_province_id = null
+      this.wifeProvinceDropOpen = true
+      this.clearWifeLocationError()
+    },
+
+    async onWifeProvinceBlur() {
+      setTimeout(async () => {
+        this.wifeProvinceDropOpen = false
+        const name = this.wifeProvinceSearch.trim()
+        if (name && !this.formData.wife_province_id) {
+          const existing = this.provinces.find(p => p.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.wife_province_id = existing.province_id
+            this.wifeProvinceSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/provinces/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+              this.provinces.push(newItem)
+              this.formData.wife_province_id = newItem.province_id
+              this.wifeProvinceSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания губернии:', err) }
+          }
+          this.clearWifeLocationError()
+        }
+      }, 200)
+    },
+
+    selectWifeProvince(item) {
+      this.formData.wife_province_id = item.province_id
+      this.wifeProvinceSearch = item.name
+      this.wifeProvinceDropOpen = false
+      this.clearWifeLocationError()
+    },
+
+    async createNewWifeProvince() {
+      const name = this.wifeProvinceSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/provinces/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+        this.provinces.push(newItem)
+        this.formData.wife_province_id = newItem.province_id
+        this.wifeProvinceSearch = newItem.name
+        this.wifeProvinceDropOpen = false
+        this.clearWifeLocationError()
+      } catch (err) { console.error('Ошибка создания губернии:', err) }
+    },
+
+    onWifeYezdInput() {
+      this.formData.wife_yezd_id = null
+      this.wifeYezdDropOpen = true
+      this.clearWifeLocationError()
+    },
+
+    async onWifeYezdBlur() {
+      setTimeout(async () => {
+        this.wifeYezdDropOpen = false
+        const name = this.wifeYezdSearch.trim()
+        if (name && !this.formData.wife_yezd_id) {
+          const existing = this.yezds.find(y => y.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.wife_yezd_id = existing.yezd_id
+            this.wifeYezdSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/yezds/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+              this.yezds.push(newItem)
+              this.formData.wife_yezd_id = newItem.yezd_id
+              this.wifeYezdSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания уезда:', err) }
+          }
+          this.clearWifeLocationError()
+        }
+      }, 200)
+    },
+
+    selectWifeYezd(item) {
+      this.formData.wife_yezd_id = item.yezd_id
+      this.wifeYezdSearch = item.name
+      this.wifeYezdDropOpen = false
+      this.clearWifeLocationError()
+    },
+
+    async createNewWifeYezd() {
+      const name = this.wifeYezdSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/yezds/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+        this.yezds.push(newItem)
+        this.formData.wife_yezd_id = newItem.yezd_id
+        this.wifeYezdSearch = newItem.name
+        this.wifeYezdDropOpen = false
+        this.clearWifeLocationError()
+      } catch (err) { console.error('Ошибка создания уезда:', err) }
+    },
+
+    onWifeVolostInput() {
+      this.formData.wife_volost_id = null
+      this.wifeVolostDropOpen = true
+      this.clearWifeLocationError()
+    },
+
+    async onWifeVolostBlur() {
+      setTimeout(async () => {
+        this.wifeVolostDropOpen = false
+        const name = this.wifeVolostSearch.trim()
+        if (name && !this.formData.wife_volost_id) {
+          const existing = this.volosts.find(v => v.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.wife_volost_id = existing.volost_id
+            this.wifeVolostSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/volosts/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+              this.volosts.push(newItem)
+              this.formData.wife_volost_id = newItem.volost_id
+              this.wifeVolostSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания волости:', err) }
+          }
+          this.clearWifeLocationError()
+        }
+      }, 200)
+    },
+
+    selectWifeVolost(item) {
+      this.formData.wife_volost_id = item.volost_id
+      this.wifeVolostSearch = item.name
+      this.wifeVolostDropOpen = false
+      this.clearWifeLocationError()
+    },
+
+    async createNewWifeVolost() {
+      const name = this.wifeVolostSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/volosts/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+        this.volosts.push(newItem)
+        this.formData.wife_volost_id = newItem.volost_id
+        this.wifeVolostSearch = newItem.name
+        this.wifeVolostDropOpen = false
+        this.clearWifeLocationError()
+      } catch (err) { console.error('Ошибка создания волости:', err) }
+    },
+
+    onWifeVillageInput() {
+      this.formData.wife_village_id = null
+      this.wifeVillageDropOpen = true
+      this.clearWifeLocationError()
+    },
+
+    async onWifeVillageBlur() {
+      setTimeout(async () => {
+        this.wifeVillageDropOpen = false
+        const name = this.wifeVillageSearch.trim()
+        if (name && !this.formData.wife_village_id) {
+          const existing = this.villages.find(v => v.name.toLowerCase() === name.toLowerCase())
+          if (existing) {
+            this.formData.wife_village_id = existing.village_id
+            this.wifeVillageSearch = existing.name
+          } else {
+            try {
+              const newItem = await api('/api/villages/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+              this.villages.push(newItem)
+              this.formData.wife_village_id = newItem.village_id
+              this.wifeVillageSearch = newItem.name
+            } catch (err) { console.error('Ошибка создания населенного пункта:', err) }
+          }
+          this.clearWifeLocationError()
+        }
+      }, 200)
+    },
+
+    selectWifeVillage(item) {
+      this.formData.wife_village_id = item.village_id
+      this.wifeVillageSearch = item.name
+      this.wifeVillageDropOpen = false
+      this.clearWifeLocationError()
+    },
+
+    async createNewWifeVillage() {
+      const name = this.wifeVillageSearch.trim()
+      if (!name) return
+      try {
+        const newItem = await api('/api/villages/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name }) })
+        this.villages.push(newItem)
+        this.formData.wife_village_id = newItem.village_id
+        this.wifeVillageSearch = newItem.name
+        this.wifeVillageDropOpen = false
+        this.clearWifeLocationError()
+      } catch (err) { console.error('Ошибка создания населенного пункта:', err) }
+    },
+
+    clearWifeLocationError() {
+      if (this.missingFieldsList.includes('wife_location')) {
+        const index = this.missingFieldsList.indexOf('wife_location')
+        this.missingFieldsList.splice(index, 1)
+      }
+    },
+
+    // ══════════════════════════════════════════════════════════════
+    // ПОРУЧИТЕЛИ (без авто-заполнения)
+    // ══════════════════════════════════════════════════════════════
     addMaleGuarantor()   { this.maleGuarantors.push(this.emptyGuarantor()) },
     addFemaleGuarantor() { this.femaleGuarantors.push(this.emptyGuarantor()) },
     addPriest()          { this.priests.push(this.emptyPriest()) },
@@ -1451,7 +1772,6 @@ export default {
         if (type === 'religion') {
           result = await api('/api/religions/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name: this.modal.value.trim() }) })
           this.religions.push(result)
-          this.formData.creed_id = result.creed_id
         }
         if (type === 'wife_status') {
           result = await api('/api/status-choices/', { method: 'POST', headers: authHeaders(true), body: JSON.stringify({ name: this.modal.value.trim() }) })
@@ -1522,7 +1842,7 @@ export default {
         'number_case', 'year', 'page', 'number_record', 
         'marriage_month', 'marriage_day', 
         'husband_name', 'husband_surname', 'husband_age', 'husband_estate_id',
-        'wife_name', 'wife_surname', 'wife_age', 'wife_estate_id', 'wife_status',
+        'wife_name', 'wife_surname', 'wife_age', 'wife_estate_id', 'wife_creed_id',
         'creed_id'
       ]
       const missing = []
@@ -1640,7 +1960,7 @@ export default {
             patronymic: this.formData.wife_patronymic || '',
             sex: 'Ж',
             estate: this.formData.wife_estate_id ? Number(this.formData.wife_estate_id) : null,
-            creed: this.formData.creed_id ? Number(this.formData.creed_id) : null,
+            creed: this.formData.wife_creed_id ? Number(this.formData.wife_creed_id) : this.formData.creed_id ? Number(this.formData.creed_id) : null,
             province: this.formData.wife_province_id ? Number(this.formData.wife_province_id) : null,
             yezd: this.formData.wife_yezd_id ? Number(this.formData.wife_yezd_id) : null,
             volost: this.formData.wife_volost_id ? Number(this.formData.wife_volost_id) : null,
@@ -1864,7 +2184,7 @@ export default {
                 surname: this.formData.wife_surname || 'Неизвестно',
                 patronymic: this.formData.wife_patronymic || '',
                 estate: this.formData.wife_estate_id ? Number(this.formData.wife_estate_id) : null,
-                creed: this.formData.creed_id ? Number(this.formData.creed_id) : null,
+                creed: this.formData.wife_creed_id ? Number(this.formData.wife_creed_id) : this.formData.creed_id ? Number(this.formData.creed_id) : null,
                 province: this.formData.wife_province_id ? Number(this.formData.wife_province_id) : null,
                 yezd: this.formData.wife_yezd_id ? Number(this.formData.wife_yezd_id) : null,
                 volost: this.formData.wife_volost_id ? Number(this.formData.wife_volost_id) : null,
@@ -2136,6 +2456,23 @@ export default {
           api(`/api/marriage-record-priests/?marriage=${recordId}`, { headers: authHeaders() }).catch(() => [])
         ])
 
+        const resolveId = (val, idField = null) => {
+          if (val === null || val === undefined || val === '') return null
+          if (typeof val === 'object') {
+            if (idField && val[idField] !== undefined) return Number(val[idField])
+            const key = Object.keys(val).find(k => k.endsWith('_id'))
+            return key ? Number(val[key]) : null
+          }
+          const n = Number(val)
+          return isNaN(n) ? null : n
+        }
+
+        const findName = (list, id, key) => {
+          if (!id) return ''
+          const found = list.find(i => i[key] === id)
+          return found ? found.name : ''
+        }
+
         if (husbands && husbands.length > 0 && husbands[0].person) {
           this.existingPersonIds.husband = husbands[0].person
           const husbandPerson = await api(`/api/persons/${husbands[0].person}/`, { headers: authHeaders() }).catch(() => null)
@@ -2149,25 +2486,13 @@ export default {
             this.formData.creed_id = husbandPerson.creed || ''
             
             this.formData.husband_province_id = husbandPerson.province || ''
-            if (husbandPerson.province) {
-              const p = this.provinces.find(prov => prov.province_id === husbandPerson.province)
-              if (p) this.husbandProvinceSearch = p.name
-            }
+            this.husbandProvinceSearch = findName(this.provinces, this.formData.husband_province_id, 'province_id')
             this.formData.husband_yezd_id = husbandPerson.yezd || ''
-            if (husbandPerson.yezd) {
-              const y = this.yezds.find(ye => ye.yezd_id === husbandPerson.yezd)
-              if (y) this.husbandYezdSearch = y.name
-            }
+            this.husbandYezdSearch = findName(this.yezds, this.formData.husband_yezd_id, 'yezd_id')
             this.formData.husband_volost_id = husbandPerson.volost || ''
-            if (husbandPerson.volost) {
-              const v = this.volosts.find(vo => vo.volost_id === husbandPerson.volost)
-              if (v) this.husbandVolostSearch = v.name
-            }
+            this.husbandVolostSearch = findName(this.volosts, this.formData.husband_volost_id, 'volost_id')
             this.formData.husband_village_id = husbandPerson.village || ''
-            if (husbandPerson.village) {
-              const v = this.villages.find(vi => vi.village_id === husbandPerson.village)
-              if (v) this.husbandVillageSearch = v.name
-            }
+            this.husbandVillageSearch = findName(this.villages, this.formData.husband_village_id, 'village_id')
           }
         }
 
@@ -2181,27 +2506,16 @@ export default {
             this.formData.wife_age = wives[0].age || ''
             this.formData.wife_number_marriage = wives[0].number_marriage || 1
             this.formData.wife_estate_id = wifePerson.estate || ''
+            this.formData.wife_creed_id = wifePerson.creed || ''
             
             this.formData.wife_province_id = wifePerson.province || ''
-            if (wifePerson.province) {
-              const p = this.provinces.find(prov => prov.province_id === wifePerson.province)
-              if (p) this.wifeProvinceSearch = p.name
-            }
+            this.wifeProvinceSearch = findName(this.provinces, this.formData.wife_province_id, 'province_id')
             this.formData.wife_yezd_id = wifePerson.yezd || ''
-            if (wifePerson.yezd) {
-              const y = this.yezds.find(ye => ye.yezd_id === wifePerson.yezd)
-              if (y) this.wifeYezdSearch = y.name
-            }
+            this.wifeYezdSearch = findName(this.yezds, this.formData.wife_yezd_id, 'yezd_id')
             this.formData.wife_volost_id = wifePerson.volost || ''
-            if (wifePerson.volost) {
-              const v = this.volosts.find(vo => vo.volost_id === wifePerson.volost)
-              if (v) this.wifeVolostSearch = v.name
-            }
+            this.wifeVolostSearch = findName(this.volosts, this.formData.wife_volost_id, 'volost_id')
             this.formData.wife_village_id = wifePerson.village || ''
-            if (wifePerson.village) {
-              const v = this.villages.find(vi => vi.village_id === wifePerson.village)
-              if (v) this.wifeVillageSearch = v.name
-            }
+            this.wifeVillageSearch = findName(this.villages, this.formData.wife_village_id, 'village_id')
             
             try {
               const statuses = await api(`/api/statuses/?person=${wives[0].person}`, { headers: authHeaders() }).catch(() => [])
@@ -2263,25 +2577,13 @@ export default {
                 guarantor.creed_id = guarantorPerson.creed || ''
                 
                 guarantor.province_id = guarantorPerson.province || ''
-                if (guarantorPerson.province) {
-                  const p = this.provinces.find(prov => prov.province_id === guarantorPerson.province)
-                  if (p) guarantor.provinceSearch = p.name
-                }
+                guarantor.provinceSearch = findName(this.provinces, guarantor.province_id, 'province_id')
                 guarantor.yezd_id = guarantorPerson.yezd || ''
-                if (guarantorPerson.yezd) {
-                  const y = this.yezds.find(ye => ye.yezd_id === guarantorPerson.yezd)
-                  if (y) guarantor.yezdSearch = y.name
-                }
+                guarantor.yezdSearch = findName(this.yezds, guarantor.yezd_id, 'yezd_id')
                 guarantor.volost_id = guarantorPerson.volost || ''
-                if (guarantorPerson.volost) {
-                  const v = this.volosts.find(vo => vo.volost_id === guarantorPerson.volost)
-                  if (v) guarantor.volostSearch = v.name
-                }
+                guarantor.volostSearch = findName(this.volosts, guarantor.volost_id, 'volost_id')
                 guarantor.village_id = guarantorPerson.village || ''
-                if (guarantorPerson.village) {
-                  const v = this.villages.find(vi => vi.village_id === guarantorPerson.village)
-                  if (v) guarantor.villageSearch = v.name
-                }
+                guarantor.villageSearch = findName(this.villages, guarantor.village_id, 'village_id')
                 
                 this.maleGuarantors.push(guarantor)
               }
@@ -2308,25 +2610,13 @@ export default {
                 guarantor.creed_id = guarantorPerson.creed || ''
                 
                 guarantor.province_id = guarantorPerson.province || ''
-                if (guarantorPerson.province) {
-                  const p = this.provinces.find(prov => prov.province_id === guarantorPerson.province)
-                  if (p) guarantor.provinceSearch = p.name
-                }
+                guarantor.provinceSearch = findName(this.provinces, guarantor.province_id, 'province_id')
                 guarantor.yezd_id = guarantorPerson.yezd || ''
-                if (guarantorPerson.yezd) {
-                  const y = this.yezds.find(ye => ye.yezd_id === guarantorPerson.yezd)
-                  if (y) guarantor.yezdSearch = y.name
-                }
+                guarantor.yezdSearch = findName(this.yezds, guarantor.yezd_id, 'yezd_id')
                 guarantor.volost_id = guarantorPerson.volost || ''
-                if (guarantorPerson.volost) {
-                  const v = this.volosts.find(vo => vo.volost_id === guarantorPerson.volost)
-                  if (v) guarantor.volostSearch = v.name
-                }
+                guarantor.volostSearch = findName(this.volosts, guarantor.volost_id, 'volost_id')
                 guarantor.village_id = guarantorPerson.village || ''
-                if (guarantorPerson.village) {
-                  const v = this.villages.find(vi => vi.village_id === guarantorPerson.village)
-                  if (v) guarantor.villageSearch = v.name
-                }
+                guarantor.villageSearch = findName(this.villages, guarantor.village_id, 'village_id')
                 
                 this.femaleGuarantors.push(guarantor)
               }
@@ -2369,7 +2659,6 @@ export default {
   }
 }
 </script>
-
 
 <style scoped>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2583,10 +2872,6 @@ export default {
 .sub-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .sub-block-header span { font-size: 12px; font-weight: 600; color: #888780; }
 .header-actions { display: flex; gap: 8px; align-items: center; }
-
-.btn-auto-fill { background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 500; font-family: inherit; cursor: pointer; color: #92400e; transition: all 0.15s; white-space: nowrap; }
-.btn-auto-fill:hover:not(:disabled) { background: #fde68a; transform: scale(1.02); }
-.btn-auto-fill:disabled { opacity: 0.4; cursor: not-allowed; background: #f0efee; border-color: #c8c5c0; color: #888; }
 
 .btn-remove { background: none; border: none; cursor: pointer; font-size: 16px; color: #aaa; padding: 0 4px; line-height: 1; transition: color .15s; }
 .btn-remove:hover { color: #a00; }

@@ -96,12 +96,93 @@ const loading = ref(false)
 const error = ref('')
 const showPassword = ref(false)
 
+// Функция для перевода английских ошибок на русский язык
+const translateErrorMessage = (message) => {
+  // Проверяем, что message - строка
+  if (typeof message !== 'string') {
+    return 'Неверный email или пароль'
+  }
+
+  const errorMap = {
+    'No active account found with the given credentials': 'Не найден активный аккаунт с указанными учетными данными',
+    'Invalid email or password': 'Неверный email или пароль',
+    'Unable to log in with provided credentials': 'Невозможно войти с указанными учетными данными',
+    'Email is not valid': 'Email имеет неверный формат',
+    'This field is required': 'Это поле обязательно для заполнения',
+    'Enter a valid email address': 'Введите корректный email адрес',
+    'password': 'Неверный пароль',
+    'email': 'Неверный email'
+  }
+  
+  // Ищем совпадение по ключевым фразам
+  for (const [eng, rus] of Object.entries(errorMap)) {
+    if (message.toLowerCase().includes(eng.toLowerCase())) {
+      return rus
+    }
+  }
+  
+  // Если ничего не найдено, возвращаем исходное сообщение или стандартное
+  return message || 'Неверный email или пароль'
+}
+
+// Функция для обработки различных форматов ошибок от API
+const handleApiError = (data) => {
+  // Обработка detail (самый распространенный формат)
+  if (data.detail) {
+    if (typeof data.detail === 'string') {
+      return translateErrorMessage(data.detail)
+    }
+    if (Array.isArray(data.detail) && data.detail.length > 0) {
+      return translateErrorMessage(data.detail[0])
+    }
+  }
+  
+  // Обработка non_field_errors (Django REST framework)
+  if (data.non_field_errors) {
+    if (Array.isArray(data.non_field_errors) && data.non_field_errors.length > 0) {
+      return translateErrorMessage(data.non_field_errors[0])
+    }
+    return translateErrorMessage(data.non_field_errors)
+  }
+  
+  // Обработка ошибок для конкретных полей
+  if (data.email) {
+    const emailError = Array.isArray(data.email) ? data.email[0] : data.email
+    return translateErrorMessage(emailError)
+  }
+  
+  if (data.password) {
+    const passwordError = Array.isArray(data.password) ? data.password[0] : data.password
+    return translateErrorMessage(passwordError)
+  }
+  
+  // Если ошибка в виде массива
+  if (Array.isArray(data) && data.length > 0) {
+    return translateErrorMessage(data[0])
+  }
+  
+  // Если ошибка в виде строки
+  if (typeof data === 'string') {
+    return translateErrorMessage(data)
+  }
+  
+  // Стандартная ошибка
+  return 'Неверный email или пароль'
+}
+
 const login = async () => {
   error.value = ''
   loading.value = true
 
-  if (!email.value || !password.value) {
-    error.value = 'Заполните все поля'
+  // Валидация на клиенте
+  if (!email.value.trim()) {
+    error.value = 'Введите email'
+    loading.value = false
+    return
+  }
+  
+  if (!password.value) {
+    error.value = 'Введите пароль'
     loading.value = false
     return
   }
@@ -111,7 +192,7 @@ const login = async () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: email.value,
+        email: email.value.trim(),
         password: password.value,
       }),
     })
@@ -119,15 +200,21 @@ const login = async () => {
     const data = await response.json()
 
     if (response.ok) {
-      localStorage.setItem('access_token', data.access)
-      localStorage.setItem('refresh_token', data.refresh)
-      router.push('/home')
+      // Успешный вход
+      if (data.access && data.refresh) {
+        localStorage.setItem('access_token', data.access)
+        localStorage.setItem('refresh_token', data.refresh)
+        router.push('/home')
+      } else {
+        error.value = 'Ошибка: сервер не вернул токены доступа'
+      }
     } else {
-      error.value = data.detail || 'Неверный email или пароль'
+      // Обработка ошибок от сервера
+      error.value = handleApiError(data)
     }
   } catch (err) {
-    console.error(err)
-    error.value = 'Ошибка соединения с сервером'
+    console.error('Login error:', err)
+    error.value = 'Ошибка соединения с сервером. Проверьте интернет-соединение.'
   } finally {
     loading.value = false
   }

@@ -270,8 +270,8 @@ class Marriage(models.Model):
 
 class Deaths(models.Model):
     death_id = models.BigAutoField(primary_key=True, verbose_name="Код смерти")
-    archive = models.ForeignKey(Archive, on_delete=models.PROTECT,db_column="archive_id", verbose_name="Архив")
-    person = models.ForeignKey(Persons, on_delete=models.PROTECT,db_column="person_id", verbose_name="Персона",null=True, blank=True, related_name="death_records")
+    archive = models.ForeignKey(Archive, on_delete=models.PROTECT, db_column="archive_id", verbose_name="Архив")
+    person = models.ForeignKey(Persons, on_delete=models.PROTECT, db_column="person_id", verbose_name="Персона", null=True, blank=True, related_name="death_records")
     page = models.IntegerField(verbose_name="Лист")
     page_turn = models.BooleanField(default=False, verbose_name="Оборот")
     number_record = models.IntegerField(verbose_name="Номер записи")
@@ -281,19 +281,25 @@ class Deaths(models.Model):
     death_month = models.IntegerField(null=True, blank=True, verbose_name="Месяц смерти")
     death_day = models.IntegerField(null=True, blank=True, verbose_name="Число смерти")
     burial_day = models.IntegerField(null=True, blank=True, verbose_name="Число погребения")
-    age = models.IntegerField(null=True, blank=True, verbose_name="Возраст")
+    
+    # Возраст - разделён на 4 поля
+    age_years = models.IntegerField(null=True, blank=True, verbose_name="Возраст (лет)")
+    age_months = models.IntegerField(null=True, blank=True, verbose_name="Возраст (месяцев)")
+    age_weeks = models.IntegerField(null=True, blank=True, verbose_name="Возраст (недель)")
+    age_days = models.IntegerField(null=True, blank=True, verbose_name="Возраст (дней)")
+    
     cause_of_death = models.CharField(max_length=255, null=True, blank=True, verbose_name="Причина смерти")
     buried_by = models.CharField(max_length=255, null=True, blank=True, verbose_name="Кем погребён")
-    pries = models.ForeignKey(ChurchWorkers, null=True, blank=True, on_delete=models.PROTECT,db_column="pries_id", verbose_name="Священнослужитель")
-    burial_place = models.CharField(max_length=255, null=True, blank=True,db_column="burial_place", verbose_name="Место погребения")
+    pries = models.ForeignKey(ChurchWorkers, null=True, blank=True, on_delete=models.PROTECT, db_column="pries_id", verbose_name="Священнослужитель")
+    burial_place = models.CharField(max_length=255, null=True, blank=True, db_column="burial_place", verbose_name="Место погребения")
     comment = models.TextField(null=True, blank=True, verbose_name="Комментарий")
-    province = models.ForeignKey(Provinces, null=True, blank=True, on_delete=models.PROTECT,db_column="province_id", verbose_name="Губерния")
-    yezd = models.ForeignKey(Yezds, null=True, blank=True, on_delete=models.PROTECT,db_column="yezd_id", verbose_name="Уезд")
-    volost = models.ForeignKey(Volosts, null=True, blank=True, on_delete=models.PROTECT,db_column="volost_id", verbose_name="Волость")
-    village = models.ForeignKey(Villages, null=True, blank=True, on_delete=models.PROTECT,db_column="village_id", verbose_name="Село")
-    estate = models.ForeignKey(Estates, null=True, blank=True, on_delete=models.PROTECT,db_column="estate_id", verbose_name="Сословие")
-    kinship = models.ForeignKey(Kinship, null=True, blank=True, on_delete=models.PROTECT,db_column="kinship_id", verbose_name="Степень родства")
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,db_column="created_by_id", verbose_name="Создал пользователь",related_name="deaths_created")
+    province = models.ForeignKey(Provinces, null=True, blank=True, on_delete=models.PROTECT, db_column="province_id", verbose_name="Губерния")
+    yezd = models.ForeignKey(Yezds, null=True, blank=True, on_delete=models.PROTECT, db_column="yezd_id", verbose_name="Уезд")
+    volost = models.ForeignKey(Volosts, null=True, blank=True, on_delete=models.PROTECT, db_column="volost_id", verbose_name="Волость")
+    village = models.ForeignKey(Villages, null=True, blank=True, on_delete=models.PROTECT, db_column="village_id", verbose_name="Село")
+    estate = models.ForeignKey(Estates, null=True, blank=True, on_delete=models.PROTECT, db_column="estate_id", verbose_name="Сословие")
+    kinship = models.ForeignKey(Kinship, null=True, blank=True, on_delete=models.PROTECT, db_column="kinship_id", verbose_name="Степень родства")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, db_column="created_by_id", verbose_name="Создал пользователь", related_name="deaths_created")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     class Meta:
@@ -306,6 +312,20 @@ class Deaths(models.Model):
         if self.person:
             return f"{self.person.surname} {self.person.name} — {self.date}"
         return f"Смерть #{self.death_id} — {self.date}"
+    
+    @property
+    def age_display(self):
+        """Форматированный вывод возраста"""
+        parts = []
+        if self.age_years and self.age_years > 0:
+            parts.append(f"{self.age_years} {'год' if self.age_years == 1 else 'года' if 2 <= self.age_years <= 4 else 'лет'}")
+        if self.age_months and self.age_months > 0:
+            parts.append(f"{self.age_months} {'месяц' if self.age_months == 1 else 'месяца' if 2 <= self.age_months <= 4 else 'месяцев'}")
+        if self.age_weeks and self.age_weeks > 0:
+            parts.append(f"{self.age_weeks} {'неделя' if self.age_weeks == 1 else 'недели' if 2 <= self.age_weeks <= 4 else 'недель'}")
+        if self.age_days and self.age_days > 0:
+            parts.append(f"{self.age_days} {'день' if self.age_days == 1 else 'дня' if 2 <= self.age_days <= 4 else 'дней'}")
+        return " ".join(parts) if parts else "не указан"
 
 
 class DeathRecordPriest(models.Model):
